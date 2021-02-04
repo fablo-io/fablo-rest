@@ -1,9 +1,12 @@
 import express from "express";
 import bodyParser from "body-parser";
 import FabricCAServices from "fabric-ca-client";
-import enrolledAdmin from "./enrolledAdmin";
+import { User } from "fabric-common";
+import EnrolledUserCache from "./EnrolledUserCache";
 
 const PORT = 8000;
+const MSP_ID = "Org1MSP";
+const AFFILIATION = "org1";
 
 const app = express();
 app.use(bodyParser.json());
@@ -18,7 +21,17 @@ const ca = new FabricCAServices("http://localhost:7031");
 // enroll - POSTem user/pass
 // invoke/query standardowo
 
-app.post("/admin/user/register", (req, res) => {
+app.post("/user/register", async (req, res) => {
+  const authToken = req.header("Authorization");
+  if (!authToken) {
+    return res.status(400).send({ message: "Missing authorization header" });
+  }
+
+  const caller = EnrolledUserCache.get(authToken);
+  if (!caller) {
+    return res.status(403).send({ message: "User with provided token is not enrolled" });
+  }
+
   const id = req.body.id;
   const secret = req.body.secret;
 
@@ -26,25 +39,29 @@ app.post("/admin/user/register", (req, res) => {
     enrollmentID: id,
     enrollmentSecret: secret,
     role: "user",
-    affiliation: "org1",
+    affiliation: AFFILIATION,
   };
 
-  enrolledAdmin(ca)
-    .then((admin) => ca.register(registerRequest, admin))
-    .then(() => res.status(201).send({ message: "ok" }))
-    .catch((e) => res.status(400).send({ message: e.message }));
+  try {
+    await ca.register(registerRequest, caller);
+    return res.status(201).send({ message: "ok" });
+  } catch (e) {
+    return res.status(400).send({ message: e.message });
+  }
 });
 
-app.post("/user/enroll", (req, res) => {
+app.post("/user/enroll", async (req, res) => {
   const id = req.body.id;
   const secret = req.body.secret;
-
-  ca.enroll({ enrollmentID: id, enrollmentSecret: secret })
-    .then((enrollResp) => {
-      console.log(enrollResp);
-      res.status(200).send({ key: enrollResp.key.toBytes(), certificate: enrollResp.certificate });
-    })
-    .catch((e) => res.status(400).send({ message: e.message }));
+  try {
+    const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
+    const user = new User(id);
+    await user.setEnrollment(enrollResp.key, enrollResp.certificate, MSP_ID);
+    const token = EnrolledUserCache.put(user);
+    res.status(200).send({ token });
+  } catch (e) {
+    res.status(400).send({ message: e.message });
+  }
 });
 
 app.listen(PORT, () => {

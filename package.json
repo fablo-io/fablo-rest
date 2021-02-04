@@ -49,7 +49,6 @@
     "@rollup/plugin-typescript": "^8.1.1",
     "@types/jest": "^26.0.20",
     "@types/node-fetch": "^2.5.8",
-    "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.14.2",
     "@typescript-eslint/parser": "^4.14.2",
     "eslint": "^7.19.0",
@@ -69,19 +68,20 @@
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
     "ts-node": "^9.1.1",
-    "typescript": "^4.1.3",
-    "uuid": "^8.3.2"
+    "typescript": "^4.1.3"
   },
   "peerDependencies": {},
   "dependencies": {
     "@types/body-parser": "^1.19.0",
     "@types/express": "^4.17.11",
     "@types/lodash": "^4.14.168",
+    "@types/uuid": "^8.3.0",
     "express": "^4.17.1",
     "fabric-ca-client": "^2.2.5",
     "fabric-client": "^1.4.17",
     "fabric-network": "^2.2.5",
     "lodash": "^4.17.20",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "uuid": "^8.3.2"
   }
 }
