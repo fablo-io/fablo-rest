@@ -72,13 +72,15 @@ describe("Simple invoke flow", () => {
     userEnrollToken = response.body.token;
     console.log(userEnrollToken);
   });
-});
 
-it("should allow to invoke chaincode", async () => {
-  // // Given
-  // const channel = "";
-  // const chaincode = "";
+  // it("should allow to invoke chaincode", async () => {
+  //   // Given
+  //   const channel = "";
+  //   const chaincode = "";
   //
-  // // When
-  // const response = await post("chaincode/");
+  //   // When
+  //   const response = await post("chaincode/");
+  //
+  //   // Then
+  // });
 });

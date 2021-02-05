@@ -1,7 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
 import FabricCAServices from "fabric-ca-client";
-import { User } from "fabric-common";
 import EnrolledUserCache from "./EnrolledUserCache";
 
 const PORT = 8000;
@@ -27,7 +26,7 @@ app.post("/user/register", async (req, res) => {
     return res.status(400).send({ message: "Missing authorization header" });
   }
 
-  const caller = EnrolledUserCache.get(authToken);
+  const caller = await EnrolledUserCache.getUser(authToken);
   if (!caller) {
     return res.status(403).send({ message: "User with provided token is not enrolled" });
   }
@@ -51,18 +50,29 @@ app.post("/user/register", async (req, res) => {
 });
 
 app.post("/user/enroll", async (req, res) => {
-  const id = req.body.id;
-  const secret = req.body.secret;
+  const id: string = req.body.id;
+  const secret: string = req.body.secret;
+  console.log(id, secret);
   try {
     const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
-    const user = new User(id);
-    await user.setEnrollment(enrollResp.key, enrollResp.certificate, MSP_ID);
-    const token = EnrolledUserCache.put(user);
+    const token = await EnrolledUserCache.put(id, enrollResp.key, enrollResp.certificate, MSP_ID);
     res.status(200).send({ token });
   } catch (e) {
     res.status(400).send({ message: e.message });
   }
 });
+
+// app.post("/chaincode", async (req, res) => {
+//   try {
+//     const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
+//     const user = new User(id);
+//     await user.setEnrollment(enrollResp.key, enrollResp.certificate, MSP_ID);
+//     const token = EnrolledUserCache.put(user);
+//     res.status(200).send({ token });
+//   } catch (e) {
+//     res.status(400).send({ message: e.message });
+//   }
+// });
 
 app.listen(PORT, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
