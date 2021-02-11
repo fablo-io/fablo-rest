@@ -73,14 +73,20 @@ describe("Simple invoke flow", () => {
     console.log(userEnrollToken);
   });
 
-  // it("should allow to invoke chaincode", async () => {
-  //   // Given
-  //   const channel = "";
-  //   const chaincode = "";
-  //
-  //   // When
-  //   const response = await post("chaincode/");
-  //
-  //   // Then
-  // });
+  it("should allow to invoke chaincode", async () => {
+    // Given
+    // const channel = "";
+    // const chaincode = "";
+
+    // When
+    const response = await post("/chaincode", {}, { Authorization: userEnrollToken });
+
+    // Then
+    expect(response).toEqual(
+      expect.objectContaining({
+        status: 200,
+        body: { response: { success: "OK" } },
+      }),
+    );
+  });
 });

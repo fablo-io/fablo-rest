@@ -35,6 +35,12 @@ const getUser = async (key: string): Promise<User | undefined> => {
   return identity.user;
 };
 
+const getIdentity = async (key: string): Promise<X509Identity | undefined> => {
+  const identity: CachedIdentity | undefined = cache.get(key);
+  if (!identity) return undefined;
+  return identity.identity;
+};
+
 const getWallet = async (key: string): Promise<Wallet> => {
   const wallet = await Wallets.newInMemoryWallet();
 
@@ -47,4 +53,4 @@ const getWallet = async (key: string): Promise<Wallet> => {
   return wallet;
 };
 
-export default { put, getUser, getWallet };
+export default { put, getUser, getIdentity, getWallet };

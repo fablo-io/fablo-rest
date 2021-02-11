@@ -27,7 +27,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
-    "start": "nodemon src/index.ts",
+    "start": "HFC_LOGGING='{\"debug\":\"console\"}' nodemon src/index.ts",
     "build": "rollup -c && tsc",
     "run-dist": "yarn clean && yarn build && node dist/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
