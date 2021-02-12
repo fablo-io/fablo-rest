@@ -70,7 +70,6 @@ describe("Simple invoke flow", () => {
     );
 
     userEnrollToken = response.body.token;
-    console.log(userEnrollToken);
   });
 
   it("should allow to invoke chaincode", async () => {

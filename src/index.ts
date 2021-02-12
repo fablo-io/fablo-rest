@@ -1,9 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
 import FabricCAServices from "fabric-ca-client";
-import EnrolledUserCache from "./EnrolledUserCache";
-import { Gateway } from "fabric-network";
-import { Client } from "fabric-common";
+import NetworkPool from "./NetworkPool";
+import IdentityCache from "./IdentityCache";
 
 const PORT = 8000;
 const MSP_ID = "Org1MSP";
@@ -25,7 +24,7 @@ app.post("/user/register", async (req, res) => {
     return res.status(400).send({ message: "Missing authorization header" });
   }
 
-  const caller = await EnrolledUserCache.getUser(authToken);
+  const caller = await IdentityCache.get(authToken);
   if (!caller) {
     return res.status(403).send({ message: "User with provided token is not enrolled" });
   }
@@ -41,7 +40,7 @@ app.post("/user/register", async (req, res) => {
   };
 
   try {
-    await ca.register(registerRequest, caller);
+    await ca.register(registerRequest, caller.user);
     return res.status(201).send({ message: "ok" });
   } catch (e) {
     return res.status(400).send({ message: e.message });
@@ -54,7 +53,7 @@ app.post("/user/enroll", async (req, res) => {
   console.log(id, secret);
   try {
     const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
-    const token = await EnrolledUserCache.put(id, enrollResp.key, enrollResp.certificate, MSP_ID);
+    const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, MSP_ID);
     res.status(200).send({ token });
   } catch (e) {
     res.status(400).send({ message: e.message });
@@ -67,37 +66,20 @@ app.post("/chaincode", async (req, res) => {
     return res.status(400).send({ message: "Missing authorization header" });
   }
 
-  const identity = await EnrolledUserCache.getIdentity(authToken);
-  const user = await EnrolledUserCache.getUser(authToken);
-  if (!identity || !user) {
+  const identity = await IdentityCache.get(authToken);
+  if (!identity) {
     return res.status(403).send({ message: "User with provided token is not enrolled" });
   }
 
-  const client = Client.newClient(`Fabrica-REST-${MSP_ID}`);
-  const channel = client.getChannel("my-channel1");
-
-  const endpoint = client.newEndpoint({ url: "grpc://localhost:7060" });
-  const discoverer = client.newDiscoverer(`Fabrica-REST-discoverer-${MSP_ID}`, MSP_ID);
-  await discoverer.connect(endpoint);
-
-  // use the endorsement to build the discovery request
+  const channelName = "my-channel1";
   const chaincodeName = "chaincode1";
-  const identityContext = client.newIdentityContext(user);
-  const endorsement = channel.newEndorsement(chaincodeName);
-  const discovery = channel.newDiscoveryService(`Fabrica-REST-discovery-service-${MSP_ID}`);
-  discovery.build(identityContext, { endorsement: endorsement });
-  discovery.sign(identityContext);
+  const methodName = "KVContract:put";
+  const args = ["name", "Willy Wonka"];
 
-  // discovery results will be based on the chaincode of the endorsement
-  await discovery.send({ targets: [discoverer], asLocalhost: true });
-  // console.log("\nDiscovery test 1 results :: " + JSON.stringify(discovery_results));
-
-  const gateway = new Gateway();
-  await gateway.connect(client, { identity, discovery: { asLocalhost: true, enabled: true } });
-  const network = await gateway.getNetwork("my-channel1");
+  const network = await NetworkPool.connect(identity, channelName, MSP_ID);
   const contract = network.getContract(chaincodeName);
 
-  const result = await contract.createTransaction("KVContract:put").submit("name", "Willy Wonka");
+  const result = await contract.createTransaction(methodName).submit(...args);
   const string = result.toString();
 
   try {
