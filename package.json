@@ -82,6 +82,7 @@
     "fabric-network": "^2.2.5",
     "lodash": "^4.17.20",
     "node-cache": "^5.1.2",
+    "ts-matches": "^4.0.2",
     "uuid": "^8.3.2"
   }
 }

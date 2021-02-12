@@ -4,6 +4,7 @@ import FabricCAServices from "fabric-ca-client";
 import NetworkPool from "./NetworkPool";
 import IdentityCache from "./IdentityCache";
 import { MSP_ID, PORT, AFFILIATION, FABRIC_CA_URL } from "./config";
+import matches from "ts-matches";
 
 const app = express();
 app.use(bodyParser.json());
@@ -47,7 +48,7 @@ app.post("/user/register", async (req, res) => {
 app.post("/user/enroll", async (req, res) => {
   const id: string = req.body.id;
   const secret: string = req.body.secret;
-  console.log(id, secret);
+
   try {
     const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
     const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, MSP_ID);
@@ -57,26 +58,31 @@ app.post("/user/enroll", async (req, res) => {
   }
 });
 
-app.post("/chaincode", async (req, res) => {
+app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
+  const channelName: string | undefined = req.params.channelName;
+  if (!channelName) return res.status(400).send({ message: "Missing channel name in path" });
+
+  const chaincodeName: string | undefined = req.params.chaincodeName;
+  if (!chaincodeName) return res.status(400).send({ message: "Missing chaincode name in path" });
+
+  const method: string | undefined = req.body.method;
+  if (!method) return res.status(400).send({ message: "Missing chaincode method in request body" });
+
+  const argsMatcher = matches.arrayOf(matches.string);
+  if (!argsMatcher.test(req.body.args))
+    return res.status(400).send({ message: "Invalid chaincode args. It must be an array of strings" });
+  const args: string[] = req.body.args;
+
   const authToken = req.header("Authorization");
-  if (!authToken) {
-    return res.status(400).send({ message: "Missing authorization header" });
-  }
+  if (!authToken) return res.status(400).send({ message: "Missing authorization header" });
 
   const identity = await IdentityCache.get(authToken);
-  if (!identity) {
-    return res.status(403).send({ message: "User with provided token is not enrolled" });
-  }
-
-  const channelName = "my-channel1";
-  const chaincodeName = "chaincode1";
-  const methodName = "KVContract:put";
-  const args = ["name", "Willy Wonka"];
+  if (!identity) return res.status(403).send({ message: "User with provided token is not enrolled" });
 
   const network = await NetworkPool.connect(identity, channelName);
   const contract = network.getContract(chaincodeName);
 
-  const result = await contract.createTransaction(methodName).submit(...args);
+  const result = await contract.createTransaction(method).submit(...args);
   const string = result.toString();
 
   try {

@@ -74,11 +74,17 @@ describe("Simple invoke flow", () => {
 
   it("should allow to invoke chaincode", async () => {
     // Given
-    // const channel = "";
-    // const chaincode = "";
+    const channelName = "my-channel1";
+    const chaincodeName = "chaincode1";
+    const method = "KVContract:put";
+    const args = ["name", "Willy Wonka"];
 
     // When
-    const response = await post("/chaincode", {}, { Authorization: userEnrollToken });
+    const response = await post(
+      `/invoke/${channelName}/${chaincodeName}`,
+      { method, args },
+      { Authorization: userEnrollToken },
+    );
 
     // Then
     expect(response).toEqual(
