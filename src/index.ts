@@ -3,10 +3,7 @@ import bodyParser from "body-parser";
 import FabricCAServices from "fabric-ca-client";
 import NetworkPool from "./NetworkPool";
 import IdentityCache from "./IdentityCache";
-
-const PORT = 8000;
-const MSP_ID = "Org1MSP";
-const AFFILIATION = "org1";
+import { MSP_ID, PORT, AFFILIATION, FABRIC_CA_URL } from "./config";
 
 const app = express();
 app.use(bodyParser.json());
@@ -16,7 +13,7 @@ app.use((_req, res, next) => {
   next();
 });
 
-const ca = new FabricCAServices("http://localhost:7031");
+const ca = new FabricCAServices(FABRIC_CA_URL);
 
 app.post("/user/register", async (req, res) => {
   const authToken = req.header("Authorization");
@@ -76,7 +73,7 @@ app.post("/chaincode", async (req, res) => {
   const methodName = "KVContract:put";
   const args = ["name", "Willy Wonka"];
 
-  const network = await NetworkPool.connect(identity, channelName, MSP_ID);
+  const network = await NetworkPool.connect(identity, channelName);
   const contract = network.getContract(chaincodeName);
 
   const result = await contract.createTransaction(methodName).submit(...args);
