@@ -3,8 +3,9 @@ import bodyParser from "body-parser";
 import FabricCAServices from "fabric-ca-client";
 import NetworkPool from "./NetworkPool";
 import IdentityCache from "./IdentityCache";
-import { MSP_ID, PORT, AFFILIATION, FABRIC_CA_URL } from "./config";
-import matches from "ts-matches";
+import { AFFILIATION, FABRIC_CA_URL, MSP_ID, PORT } from "./config";
+import Authorization from "./Authorization";
+import ChaincodeRequest from "./ChaincodeRequest";
 
 const app = express();
 app.use(bodyParser.json());
@@ -17,15 +18,7 @@ app.use((_req, res, next) => {
 const ca = new FabricCAServices(FABRIC_CA_URL);
 
 app.post("/user/register", async (req, res) => {
-  const authToken = req.header("Authorization");
-  if (!authToken) {
-    return res.status(400).send({ message: "Missing authorization header" });
-  }
-
-  const caller = await IdentityCache.get(authToken);
-  if (!caller) {
-    return res.status(403).send({ message: "User with provided token is not enrolled" });
-  }
+  const caller = await Authorization.forceAuthorization(req, res);
 
   const id = req.body.id;
   const secret = req.body.secret;
@@ -58,39 +51,27 @@ app.post("/user/enroll", async (req, res) => {
   }
 });
 
+const TransactionResult = {
+  parse: (b: Buffer): string | Record<string, any> => {
+    try {
+      return JSON.parse(b.toString());
+    } catch (_e) {
+      return b.toString();
+    }
+  },
+};
+
 app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
-  const channelName: string | undefined = req.params.channelName;
-  if (!channelName) return res.status(400).send({ message: "Missing channel name in path" });
+  const identity = await Authorization.forceAuthorization(req, res);
+  const chaincodeReq = ChaincodeRequest.getValid(req, res);
+  const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
 
-  const chaincodeName: string | undefined = req.params.chaincodeName;
-  if (!chaincodeName) return res.status(400).send({ message: "Missing chaincode name in path" });
+  const transactionResult = await network
+    .getContract(chaincodeReq.chaincodeName)
+    .createTransaction(chaincodeReq.method)
+    .submit(...chaincodeReq.args);
 
-  const method: string | undefined = req.body.method;
-  if (!method) return res.status(400).send({ message: "Missing chaincode method in request body" });
-
-  const argsMatcher = matches.arrayOf(matches.string);
-  if (!argsMatcher.test(req.body.args))
-    return res.status(400).send({ message: "Invalid chaincode args. It must be an array of strings" });
-  const args: string[] = req.body.args;
-
-  const authToken = req.header("Authorization");
-  if (!authToken) return res.status(400).send({ message: "Missing authorization header" });
-
-  const identity = await IdentityCache.get(authToken);
-  if (!identity) return res.status(403).send({ message: "User with provided token is not enrolled" });
-
-  const network = await NetworkPool.connect(identity, channelName);
-  const contract = network.getContract(chaincodeName);
-
-  const result = await contract.createTransaction(method).submit(...args);
-  const string = result.toString();
-
-  try {
-    const response = JSON.parse(string);
-    return res.status(200).send({ response });
-  } catch (_e) {
-    return res.status(200).send({ response: string });
-  }
+  res.status(200).send({ response: TransactionResult.parse(transactionResult) });
 });
 
 app.listen(PORT, () => {
