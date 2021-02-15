@@ -2,7 +2,7 @@ import NodeCache from "node-cache";
 import { DefaultEventHandlerStrategies, DefaultQueryHandlerStrategies, Gateway, Network } from "fabric-network";
 import { Client, User } from "fabric-common";
 import { CachedIdentity } from "./IdentityCache";
-import { AS_LOCALHOST, DISCOVERY_PEER_URLS } from "./config";
+import config from "./config";
 
 const cache = new NodeCache({ stdTTL: 60 * 5, useClones: false });
 
@@ -11,7 +11,7 @@ const createClient = async (user: User, channelName: string) => {
   const client = Client.newClient(`client-${userId}`);
   const channel = client.getChannel(channelName);
 
-  const connectedDiscoverers = DISCOVERY_PEER_URLS.map(async (url) => {
+  const connectedDiscoverers = config.DISCOVERY_URLS.map(async (url) => {
     const endpoint = client.newEndpoint({ url });
     const discoverer = client.newDiscoverer(`discoverer-${userId}`);
     await discoverer.connect(endpoint);
@@ -23,7 +23,7 @@ const createClient = async (user: User, channelName: string) => {
   const discovery = channel.newDiscoveryService(`discovery-service-${userId}`);
   discovery.build(identityContext);
   discovery.sign(identityContext);
-  await discovery.send({ targets, asLocalhost: AS_LOCALHOST });
+  await discovery.send({ targets, asLocalhost: config.AS_LOCALHOST });
 
   return client;
 };
@@ -35,7 +35,7 @@ const connectToNetwork = async (identity: CachedIdentity, channelName: string): 
   await gateway.connect(client, {
     identity: identity.identity,
     discovery: {
-      asLocalhost: AS_LOCALHOST,
+      asLocalhost: config.AS_LOCALHOST,
       enabled: true,
     },
     eventHandlerOptions: {

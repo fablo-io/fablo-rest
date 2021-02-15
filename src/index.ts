@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import FabricCAServices from "fabric-ca-client";
 import NetworkPool from "./NetworkPool";
 import IdentityCache from "./IdentityCache";
-import { AFFILIATION, FABRIC_CA_URL, MSP_ID, PORT } from "./config";
+import config from "./config";
 import Authorization from "./Authorization";
 import ChaincodeRequest from "./ChaincodeRequest";
 
@@ -15,7 +15,7 @@ app.use((_req, res, next) => {
   next();
 });
 
-const ca = new FabricCAServices(FABRIC_CA_URL);
+const ca = new FabricCAServices(config.FABRIC_CA_URL);
 
 app.post("/user/register", async (req, res) => {
   const caller = await Authorization.forceAuthorization(req, res);
@@ -27,7 +27,7 @@ app.post("/user/register", async (req, res) => {
     enrollmentID: id,
     enrollmentSecret: secret,
     role: "user",
-    affiliation: AFFILIATION,
+    affiliation: config.AFFILIATION,
   };
 
   try {
@@ -44,7 +44,7 @@ app.post("/user/enroll", async (req, res) => {
 
   try {
     const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
-    const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, MSP_ID);
+    const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, config.MSP_ID);
     res.status(200).send({ token });
   } catch (e) {
     res.status(400).send({ message: e.message });
@@ -85,6 +85,6 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
   res.status(200).send({ response: TransactionResult.parse(transactionResult) });
 });
 
-app.listen(PORT, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
+app.listen(config.PORT, () => {
+  console.log(`⚡️[server]: Server is running at https://localhost:${config.PORT}`);
 });

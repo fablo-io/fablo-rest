@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 
-const serverPath = "http://localhost:8000";
+const port = process.env.PORT ?? "8000";
+const serverPath = `http://localhost:${port}`;
 
 export const post = (
   path: string,

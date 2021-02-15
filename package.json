@@ -31,7 +31,7 @@
     "build": "rollup -c && tsc",
     "run-dist": "yarn clean && yarn build && node dist/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "test-ci": "jest --ci",
+    "test-ci": "jest --ci -i",
     "test": "jest --debug --watch",
     "test-once": "jest",
     "commit": "git-cz"
