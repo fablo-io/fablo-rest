@@ -1,5 +1,5 @@
 import NodeCache from "node-cache";
-import { Gateway, Network } from "fabric-network";
+import { DefaultEventHandlerStrategies, DefaultQueryHandlerStrategies, Gateway, Network } from "fabric-network";
 import { Client, User } from "fabric-common";
 import { CachedIdentity } from "./IdentityCache";
 import { AS_LOCALHOST, DISCOVERY_PEER_URLS } from "./config";
@@ -31,9 +31,19 @@ const createClient = async (user: User, channelName: string) => {
 const connectToNetwork = async (identity: CachedIdentity, channelName: string): Promise<Network> => {
   const client: Client = await createClient(identity.user, channelName);
   const gateway = new Gateway();
+
   await gateway.connect(client, {
     identity: identity.identity,
-    discovery: { asLocalhost: AS_LOCALHOST, enabled: true },
+    discovery: {
+      asLocalhost: AS_LOCALHOST,
+      enabled: true,
+    },
+    eventHandlerOptions: {
+      strategy: DefaultEventHandlerStrategies.MSPID_SCOPE_ALLFORTX,
+    },
+    queryHandlerOptions: {
+      strategy: DefaultQueryHandlerStrategies.MSPID_SCOPE_ROUND_ROBIN,
+    },
   });
 
   const network = await gateway.getNetwork(channelName);

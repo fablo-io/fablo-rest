@@ -68,8 +68,19 @@ app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
 
   const transactionResult = await network
     .getContract(chaincodeReq.chaincodeName)
-    .createTransaction(chaincodeReq.method)
-    .submit(...chaincodeReq.args);
+    .submitTransaction(chaincodeReq.method, ...chaincodeReq.args);
+
+  res.status(200).send({ response: TransactionResult.parse(transactionResult) });
+});
+
+app.post("/query/:channelName/:chaincodeName", async (req, res) => {
+  const identity = await Authorization.forceAuthorization(req, res);
+  const chaincodeReq = ChaincodeRequest.getValid(req, res);
+  const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
+
+  const transactionResult = await network
+    .getContract(chaincodeReq.chaincodeName)
+    .evaluateTransaction(chaincodeReq.method, ...chaincodeReq.args);
 
   res.status(200).send({ response: TransactionResult.parse(transactionResult) });
 });
