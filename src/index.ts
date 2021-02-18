@@ -28,6 +28,7 @@ app.post("/user/register", async (req, res) => {
     enrollmentSecret: secret,
     role: "user",
     affiliation: config.AFFILIATION,
+    maxEnrollments: 0,
   };
 
   try {
