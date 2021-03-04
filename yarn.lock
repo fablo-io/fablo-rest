@@ -6248,6 +6248,11 @@ ts-loader@^8.0.14:
     micromatch "^4.0.0"
     semver "^7.3.4"
 
+ts-matches@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/ts-matches/-/ts-matches-4.0.2.tgz#f40a396327cc5432fdf87d76b6a7c6684c1dfe70"
+  integrity sha512-YsF4/SpPQbR/K9voC35OMQBEYdeNU2C13yDA1vshd/ZJ1AZmqSnmL1lhzt/AqUx0CAKxKRsuBusYTV8Vlsldyg==
+
 ts-node@^9.1.1:
   version "9.1.1"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-9.1.1.tgz#51a9a450a3e959401bda5f004a72d54b936d376d"

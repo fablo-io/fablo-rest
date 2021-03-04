@@ -27,11 +27,11 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
-    "start": "nodemon src/index.ts",
+    "start": "HFC_LOGGING='{\"debug\":\"console\"}' nodemon src/index.ts",
     "build": "rollup -c && tsc",
-    "run-dist": "yarn clean && yarn build && node dist/index.js",
+    "run-dist": "NODE_ENV=production yarn clean && yarn build && node dist/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "test-ci": "jest --ci",
+    "test-ci": "jest --ci -i",
     "test": "jest --debug --watch",
     "test-once": "jest",
     "commit": "git-cz"
@@ -82,6 +82,7 @@
     "fabric-network": "^2.2.5",
     "lodash": "^4.17.20",
     "node-cache": "^5.1.2",
+    "ts-matches": "^4.0.2",
     "uuid": "^8.3.2"
   }
 }
