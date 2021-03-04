@@ -28,6 +28,7 @@ app.post("/user/register", async (req, res) => {
     enrollmentSecret: secret,
     role: "user",
     affiliation: config.AFFILIATION,
+    maxEnrollments: 0,
   };
 
   try {
@@ -66,11 +67,15 @@ app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
 
-  const transactionResult = await network
-    .getContract(chaincodeReq.chaincodeName)
-    .submitTransaction(chaincodeReq.method, ...chaincodeReq.args);
+  try {
+    const transactionResult = await network
+      .getContract(chaincodeReq.chaincodeName)
+      .submitTransaction(chaincodeReq.method, ...chaincodeReq.args);
 
-  res.status(200).send({ response: TransactionResult.parse(transactionResult) });
+    res.status(200).send({ response: TransactionResult.parse(transactionResult) });
+  } catch (e) {
+    res.status(400).send({ message: e.transactionCode ?? e.message });
+  }
 });
 
 app.post("/query/:channelName/:chaincodeName", async (req, res) => {
@@ -78,11 +83,15 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
 
-  const transactionResult = await network
-    .getContract(chaincodeReq.chaincodeName)
-    .evaluateTransaction(chaincodeReq.method, ...chaincodeReq.args);
+  try {
+    const transactionResult = await network
+      .getContract(chaincodeReq.chaincodeName)
+      .evaluateTransaction(chaincodeReq.method, ...chaincodeReq.args);
 
-  res.status(200).send({ response: TransactionResult.parse(transactionResult) });
+    res.status(200).send({ response: TransactionResult.parse(transactionResult) });
+  } catch (e) {
+    res.status(400).send({ message: e.transactionCode ?? e.message });
+  }
 });
 
 app.listen(config.PORT, () => {
