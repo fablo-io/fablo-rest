@@ -7,16 +7,14 @@ describe("Happy path", () => {
   let adminEnrollToken: string;
   let userEnrollToken: string;
 
-  const adminId = "admin";
-  const adminSecret = "adminpw";
-  const userId = uuid.v1();
-  const userSecret = "secrett123";
+  const adminCredentials = { id: "admin", secret: "adminpw" };
+  const userCredentials = { id: uuid.v1(), secret: "secrett123" };
 
   const chaincodeArg1 = uuid.v1();
 
   it("should enroll admin", async () => {
     // When
-    const response = await post("/user/enroll", { id: adminId, secret: adminSecret });
+    const response = await post("/user/enroll", adminCredentials);
 
     // Then
     expect(response).toEqual(
@@ -31,11 +29,7 @@ describe("Happy path", () => {
 
   it("should register new user", async () => {
     // When
-    const response = await post(
-      "/user/register",
-      { id: userId, secret: userSecret },
-      { Authorization: adminEnrollToken },
-    );
+    const response = await post("/user/register", userCredentials, { Authorization: adminEnrollToken });
 
     // Then
     expect(response).toEqual(
@@ -48,7 +42,7 @@ describe("Happy path", () => {
 
   it("should enroll user", async () => {
     // When
-    const response = await post("/user/enroll", { id: userId, secret: userSecret });
+    const response = await post("/user/enroll", userCredentials);
 
     // Then
     expect(response).toEqual(
