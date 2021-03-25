@@ -27,11 +27,11 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
-    "start": "nodemon src/index.ts",
+    "start": "HFC_LOGGING='{\"debug\":\"console\"}' nodemon src/index.ts",
     "build": "rollup -c && tsc",
-    "run-dist": "yarn clean && yarn build && node dist/index.js",
+    "run-dist": "NODE_ENV=production yarn clean && yarn build && node dist/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "test-ci": "jest --ci",
+    "test-ci": "jest --ci -i",
     "test": "jest --debug --watch",
     "test-once": "jest",
     "commit": "git-cz"
@@ -48,6 +48,7 @@
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@rollup/plugin-typescript": "^8.1.1",
     "@types/jest": "^26.0.20",
+    "@types/node-fetch": "^2.5.8",
     "@typescript-eslint/eslint-plugin": "^4.14.2",
     "@typescript-eslint/parser": "^4.14.2",
     "eslint": "^7.19.0",
@@ -59,6 +60,7 @@
     "eslint-plugin-prettier": "^3.3.1",
     "husky": "^4.3.8",
     "jest": "^26.6.3",
+    "node-fetch": "^2.6.1",
     "nodemon": "^2.0.7",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
@@ -73,7 +75,14 @@
     "@types/body-parser": "^1.19.0",
     "@types/express": "^4.17.11",
     "@types/lodash": "^4.14.168",
+    "@types/uuid": "^8.3.0",
     "express": "^4.17.1",
-    "lodash": "^4.17.20"
+    "fabric-ca-client": "^2.2.5",
+    "fabric-client": "^1.4.17",
+    "fabric-network": "^2.2.5",
+    "lodash": "^4.17.20",
+    "node-cache": "^5.1.2",
+    "ts-matches": "^4.0.2",
+    "uuid": "^8.3.2"
   }
 }
