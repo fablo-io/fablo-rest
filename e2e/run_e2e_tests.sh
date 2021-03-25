@@ -13,7 +13,7 @@
   PORT=9999 node dist/index.js &
   server_pid="$!"
   echo "Started server with PID $server_pid at port $PORT"
-  trap "echo 'Stopping server' && kill $server_pid" EXIT
+  trap "echo 'Stopping server' && kill $server_pid" EXIT SIGINT ERR
   sleep 5
 
   # run tests
