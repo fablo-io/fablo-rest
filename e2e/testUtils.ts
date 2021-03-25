@@ -60,3 +60,25 @@ export const generateEnrolledUser = async (): Promise<{ id: string; token: strin
   const { token } = await enroll(credentials);
   return { id: credentials.id, token };
 };
+
+export const callDefaultChaincode = async (
+  token: string,
+  type: "invoke" | "query",
+  method: string,
+  args: string[],
+  transient?: Record<string, string>,
+): Promise<{ body: any; status: number }> => {
+  const req = uuid.v1();
+  console.log("--- start", req, type, method);
+
+  const channelName = "my-channel1";
+  const chaincodeName = "chaincode1";
+  const response = await post(
+    `/${type}/${channelName}/${chaincodeName}`,
+    { method, args, transient },
+    { Authorization: token },
+  );
+
+  console.log("--- end", req, type, method);
+  return response;
+};

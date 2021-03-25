@@ -77,18 +77,19 @@
   ],
   "chaincodes": [
     {
-      "name": "kv-chaincode",
+      "name": "chaincode1",
       "version": "0.0.1",
       "lang": "node",
       "channel": "channel1",
       "init": "{\"Args\":[]}",
-      "endorsement": "AND('Org1MSP.member', 'Org2MSP.member')",
+      "endorsement": "OR('Org1MSP.member', 'Org2MSP.member')",
       "directory": "./chaincodes/chaincode-kv-node",
       "privateData": [
         {
-          "name": "org1-collection",
+          "name": "private-collection",
           "orgNames": [
-            "Org1"
+            "Org1",
+            "Org2"
           ]
         }
       ]

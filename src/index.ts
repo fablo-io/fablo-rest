@@ -70,7 +70,9 @@ app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
   try {
     const transactionResult = await network
       .getContract(chaincodeReq.chaincodeName)
-      .submitTransaction(chaincodeReq.method, ...chaincodeReq.args);
+      .createTransaction(chaincodeReq.method)
+      .setTransient(chaincodeReq.transient)
+      .submit(...chaincodeReq.args);
 
     res.status(200).send({ response: TransactionResult.parse(transactionResult) });
   } catch (e) {
@@ -86,7 +88,9 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
   try {
     const transactionResult = await network
       .getContract(chaincodeReq.chaincodeName)
-      .evaluateTransaction(chaincodeReq.method, ...chaincodeReq.args);
+      .createTransaction(chaincodeReq.method)
+      .setTransient(chaincodeReq.transient)
+      .evaluate(...chaincodeReq.args);
 
     res.status(200).send({ response: TransactionResult.parse(transactionResult) });
   } catch (e) {
