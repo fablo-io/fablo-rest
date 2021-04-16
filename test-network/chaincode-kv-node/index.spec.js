@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { JSONSerializer } = require("fabric-contract-api");
 const { ChaincodeMockStub } = require("@theledger/fabric-mock-stub");
 const ChaincodeFromContract = require("fabric-shim/lib/contract-spi/chaincodefromcontract");
