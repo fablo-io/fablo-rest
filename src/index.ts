@@ -6,6 +6,7 @@ import IdentityCache from "./IdentityCache";
 import config from "./config";
 import Authorization from "./Authorization";
 import ChaincodeRequest from "./ChaincodeRequest";
+import matches from "ts-matches";
 
 const app = express();
 app.use(bodyParser.json());
@@ -17,16 +18,30 @@ app.use((_req, res, next) => {
 
 const ca = new FabricCAServices(config.FABRIC_CA_URL);
 
+app.post("/user/enroll", async (req, res) => {
+  const id: string = req.body.id;
+  const secret: string = req.body.secret;
+  console.log("Enrolling as", id);
+
+  try {
+    const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
+    const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, config.MSP_ID);
+    res.status(200).send({ token });
+  } catch (e) {
+    res.status(400).send({ message: e.message });
+  }
+});
+
 app.post("/user/register", async (req, res) => {
-  const caller = await Authorization.forceAuthorization(req, res);
+  const caller = await Authorization.getFromToken(req, res);
 
   const id = req.body.id;
   const secret = req.body.secret;
+  console.log("Registering", id, "by", caller.user.getName());
 
   const registerRequest = {
     enrollmentID: id,
     enrollmentSecret: secret,
-    role: "user",
     affiliation: config.AFFILIATION,
     maxEnrollments: 0,
   };
@@ -39,33 +54,28 @@ app.post("/user/register", async (req, res) => {
   }
 });
 
-app.post("/user/enroll", async (req, res) => {
-  const id: string = req.body.id;
-  const secret: string = req.body.secret;
-
-  try {
-    const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
-    const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, config.MSP_ID);
-    res.status(200).send({ token });
-  } catch (e) {
-    res.status(400).send({ message: e.message });
-  }
-});
+const payloadWithStatusShape = matches.shape({ status: matches.natural, payload: matches.any });
 
 const TransactionResult = {
-  parse: (b: Buffer): string | Record<string, any> => {
+  parse: (b: Buffer): { status: number; response: any } => {
     try {
-      return JSON.parse(b.toString());
+      const payload: Record<string, any> = JSON.parse(b.toString());
+      if (payloadWithStatusShape.test(payload)) {
+        return { status: payload.status, response: payload.payload };
+      } else {
+        return { status: 200, response: payload };
+      }
     } catch (_e) {
-      return b.toString();
+      return { status: 200, response: b.toString() };
     }
   },
 };
 
 app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
-  const identity = await Authorization.forceAuthorization(req, res);
+  const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
+  console.log("Invoking chaincode", chaincodeReq.method, "by", identity.user.getName());
 
   try {
     const transactionResult = await network
@@ -74,16 +84,18 @@ app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
       .setTransient(chaincodeReq.transient)
       .submit(...chaincodeReq.args);
 
-    res.status(200).send({ response: TransactionResult.parse(transactionResult) });
+    const { status, response } = TransactionResult.parse(transactionResult);
+    res.status(status).send({ response });
   } catch (e) {
     res.status(400).send({ message: e.transactionCode ?? e.message });
   }
 });
 
 app.post("/query/:channelName/:chaincodeName", async (req, res) => {
-  const identity = await Authorization.forceAuthorization(req, res);
+  const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
+  console.log("Querying chaincode", chaincodeReq.method, "by", identity.user.getName());
 
   try {
     const transactionResult = await network
@@ -92,12 +104,13 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
       .setTransient(chaincodeReq.transient)
       .evaluate(...chaincodeReq.args);
 
-    res.status(200).send({ response: TransactionResult.parse(transactionResult) });
+    const { status, response } = TransactionResult.parse(transactionResult);
+    res.status(status).send({ response });
   } catch (e) {
     res.status(400).send({ message: e.transactionCode ?? e.message });
   }
 });
 
 app.listen(config.PORT, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${config.PORT}`);
+  console.log(`⚡️[server]: Server is running at https://localhost:${config.PORT} for organization ${config.MSP_ID}`);
 });

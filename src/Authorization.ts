@@ -1,7 +1,7 @@
 import express from "express";
 import IdentityCache, { CachedIdentity } from "./IdentityCache";
 
-const forceAuthorization = async (request: express.Request, response: express.Response): Promise<CachedIdentity> => {
+const getFromToken = async (request: express.Request, response: express.Response): Promise<CachedIdentity> => {
   const authToken = request.header("Authorization");
   if (!authToken) {
     const message = "Missing authorization header";
@@ -20,5 +20,5 @@ const forceAuthorization = async (request: express.Request, response: express.Re
 };
 
 export default {
-  forceAuthorization,
+  getFromToken,
 };
