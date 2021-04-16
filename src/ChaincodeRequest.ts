@@ -23,9 +23,10 @@ const getValidOrError = (request: express.Request): { error: string } | Chaincod
   if (!argsMatcher.test(request.body.args)) return { error: "Invalid chaincode args. It must be an array of strings" };
   const args: string[] = request.body.args;
 
-  const transientMatcher = matches.dictionary([matches.string, matches.string]);
-  if (!!request.body.transient && !transientMatcher.test(request.body.transient))
+  const transientMatcher = matches.dictionary([matches.string, matches.string]).optional();
+  if (!transientMatcher.test(request.body.transient))
     return { error: "Invalid transient parameter. It must be an object with string keys and string values" };
+
   const transientStrings: Record<string, string> = request.body.transient ?? {};
   const transient: Record<string, Buffer> = Object.keys(transientStrings)
     .map((k) => ({ [k]: Buffer.from(transientStrings[k]) }))
