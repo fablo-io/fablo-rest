@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { Contract } = require("fabric-contract-api");
 const crypto = require("crypto");
 

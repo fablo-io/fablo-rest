@@ -83,13 +83,12 @@
       "channel": "channel1",
       "init": "{\"Args\":[]}",
       "endorsement": "OR('Org1MSP.member', 'Org2MSP.member')",
-      "directory": "./chaincodes/chaincode-kv-node",
+      "directory": "./chaincode-kv-node",
       "privateData": [
         {
           "name": "private-collection",
           "orgNames": [
-            "Org1",
-            "Org2"
+            "Org1"
           ]
         }
       ]
