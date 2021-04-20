@@ -3,6 +3,8 @@ import * as uuid from "uuid";
 // @ts-ignore
 import { post } from "./testUtils";
 
+jest.setTimeout(10000);
+
 describe("Happy path", () => {
   let adminEnrollToken: string;
   let userEnrollToken: string;

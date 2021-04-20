@@ -83,7 +83,11 @@ describe("Registration", () => {
     expect(response).toEqual(
       expect.objectContaining({
         status: 400,
-        body: { message: expect.stringContaining("Failed to verify if user can act on type \\'user\\'") },
+        body: {
+          message: expect.stringContaining(
+            "fabric-ca request register failed with errors [[ { code: 71, message: 'Authorization failure' } ]]",
+          ),
+        },
       }),
     );
   });
