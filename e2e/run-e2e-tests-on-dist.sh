@@ -42,10 +42,4 @@ sleep 5
 #
 # Run tests
 #
-PORT=8000 \
-  AFFILIATION="org2" \
-  MSP_ID="Org2MSP" \
-  FABRIC_CA_URL="http://ca.org2.com:7054" \
-  DISCOVERY_URLS="grpc://peer0.org1.com:7060,grpc://peer0.org2.com:7070" \
-  AS_LOCALHOST="false" \
-  npm run test-e2e
+PORT=8000 AFFILIATION="org2" MSP_ID="Org2MSP" npm run test-e2e
