@@ -13,10 +13,14 @@
   ./docker-build.sh
 
   #
-  # Start application in the container.
+  # Get network name from fabrica-target
   #
-  # Note: it works only on linux and won't work on OSX. We cannot use host.docker.internal here,
-  # we need localhost to refer to the host where fabric network is set up.
+  network_name="$(cat test-network/fabrica-target/fabric-docker/.env | grep "COMPOSE_PROJECT_NAME=")"
+  network_name="${network_name#*=}_basic"
+  echo "Network name: $network_name"
+
+  #
+  # Start application in the container.
   #
   container=fabrica_rest_test
   port=8000
@@ -24,11 +28,11 @@
     -e PORT=9999 \
     -e AFFILIATION="org2" \
     -e MSP_ID="Org2MSP" \
-    -e FABRIC_CA_URL="http://localhost:7032" \
-    -e DISCOVERY_URLS="grpc://localhost:7060,grpc://localhost:7070" \
-    -e AS_LOCALHOST="true" \
+    -e FABRIC_CA_URL="http://ca.org2.com:7054" \
+    -e DISCOVERY_URLS="grpc://peer0.org1.com:7060,grpc://peer0.org2.com:7070" \
+    -e AS_LOCALHOST="false" \
     -p "$port:9999" \
-    --network="host" \
+    --network="$network_name" \
     -d \
     --rm \
     --name "$container" \
@@ -44,8 +48,8 @@
   PORT=8000 \
     AFFILIATION="org2" \
     MSP_ID="Org2MSP" \
-    FABRIC_CA_URL="http://localhost:7032" \
-    DISCOVERY_URLS="grpc://localhost:7060,grpc://localhost:7070" \
-    AS_LOCALHOST="true" \
+    FABRIC_CA_URL="http://ca.org2.com:7054" \
+    DISCOVERY_URLS="grpc://peer0.org1.com:7060,grpc://peer0.org2.com:7070" \
+    AS_LOCALHOST="false" \
     npm run test-e2e
 )

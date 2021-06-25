@@ -84,7 +84,8 @@
         {
           "name": "private-collection",
           "orgNames": [
-            "Org1"
+            "Org1",
+            "Org2"
           ]
         }
       ]
