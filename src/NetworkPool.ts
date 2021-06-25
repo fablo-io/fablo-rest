@@ -28,7 +28,7 @@ const createClient = async (user: User, channelName: string) => {
   return { client, discovery };
 };
 
-const discover = async (user: User, channelName: string) => {
+const discover = async (user: User, channelName: string): Promise<Record<string, any>> => {
   const { discovery } = await createClient(user, channelName);
   const results = discovery.getDiscoveryResults(true);
   return results;
