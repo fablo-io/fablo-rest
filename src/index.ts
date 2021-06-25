@@ -71,6 +71,12 @@ const TransactionResult = {
   },
 };
 
+app.post("/discover/:channelName", async (req, res) => {
+  const identity = await Authorization.getFromToken(req, res);
+  const response = await NetworkPool.discover(identity.user, req.params.channelName);
+  res.status(200).send({ response });
+});
+
 app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);

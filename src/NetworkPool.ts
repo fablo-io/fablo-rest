@@ -25,11 +25,17 @@ const createClient = async (user: User, channelName: string) => {
   discovery.sign(identityContext);
   await discovery.send({ targets, asLocalhost: config.AS_LOCALHOST });
 
-  return client;
+  return { client, discovery };
+};
+
+const discover = async (user: User, channelName: string) => {
+  const { discovery } = await createClient(user, channelName);
+  const results = discovery.getDiscoveryResults(true);
+  return results;
 };
 
 const connectToNetwork = async (identity: CachedIdentity, channelName: string): Promise<Network> => {
-  const client: Client = await createClient(identity.user, channelName);
+  const { client } = await createClient(identity.user, channelName);
   const gateway = new Gateway();
 
   await gateway.connect(client, {
@@ -63,4 +69,4 @@ const connect = async (identity: CachedIdentity, channelName: string): Promise<N
   }
 };
 
-export default { connect };
+export default { discover, connect };
