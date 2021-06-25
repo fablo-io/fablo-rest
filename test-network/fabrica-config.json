@@ -1,17 +1,13 @@
 {
   "$schema": "https://github.com/softwaremill/fabrica/releases/download/0.1.0-unstable/schema.json",
   "networkSettings": {
-    "fabricVersion": "1.4.11",
+    "fabricVersion": "2.3.2",
     "tls": false
   },
   "rootOrg": {
     "organization": {
       "name": "Orderer",
-      "mspName": "OrdererMSP",
       "domain": "root.com"
-    },
-    "ca": {
-      "prefix": "ca"
     },
     "orderer": {
       "prefix": "orderer",
@@ -23,31 +19,19 @@
     {
       "organization": {
         "name": "Org1",
-        "mspName": "Org1MSP",
         "domain": "org1.com"
       },
-      "ca": {
-        "prefix": "ca"
-      },
       "peer": {
-        "prefix": "peer",
-        "instances": 2,
-        "db": "LevelDb"
+        "instances": 2
       }
     },
     {
       "organization": {
         "name": "Org2",
-        "mspName": "Org2MSP",
         "domain": "org2.com"
       },
-      "ca": {
-        "prefix": "ca"
-      },
       "peer": {
-        "prefix": "peer",
-        "instances": 1,
-        "db": "LevelDb"
+        "instances": 1
       }
     }
   ],
