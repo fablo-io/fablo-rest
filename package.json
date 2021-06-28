@@ -29,12 +29,11 @@
     "clean": "rimraf dist",
     "start": "HFC_LOGGING='{\"debug\":\"console\"}' nodemon src/index.ts",
     "build": "rollup -c && tsc",
-    "run-dist": "NODE_ENV=production npm run clean && npm run build && node dist/index.js",
+    "start-dist": "NODE_ENV=production node dist/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "test-e2e": "jest -i ./e2e",
     "test": "jest --debug --watch",
-    "test-once": "jest",
-    "commit": "git-cz"
+    "test-once": "jest"
   },
   "husky": {
     "hooks": {
