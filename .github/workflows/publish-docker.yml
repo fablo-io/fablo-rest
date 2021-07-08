@@ -21,7 +21,7 @@ jobs:
       - name: Read version
         id: docker-image-version
         run: |
-          echo "DOCKER_IMAGE_VERION=$(jq -r '.version' <"$FABRICA_REST_HOME/package.json")" >> $GITHUB_ENV
+          echo "DOCKER_IMAGE_VERION=$(jq -r '.version' <"${{ runner.temp }}/package.json")" >> $GITHUB_ENV
 
       - name: Docker meta
         id: meta
