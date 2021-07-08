@@ -12,6 +12,9 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - 
+        name: Build fabrica-rest
+        run: npm install && npm run lint && npm run build && ls -lh ./dist
       -
         name: Docker meta
         id: meta
