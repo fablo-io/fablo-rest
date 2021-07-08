@@ -33,7 +33,6 @@ jobs:
             prefix=
             suffix=
           tags: |
-            type=sha
             type=raw,value=${{ env.DOCKER_IMAGE_VERION }}
 
       - name: Login to DockerHub
