@@ -8,8 +8,6 @@ WORKDIR /usr/src/app
 # where available (npm@5+)
 COPY package*.json ./
 RUN npm ci --only=production
+RUN npm run build
 
-# Copy app dist
-COPY dist .
-
-CMD [ "node", "index.js" ]
+CMD [ "node", "dist/index.js" ]
