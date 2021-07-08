@@ -21,7 +21,7 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           flavor: |
-            latest=auto
+            latest=true
             prefix=
             suffix=
 
