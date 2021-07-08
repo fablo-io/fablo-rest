@@ -8,6 +8,6 @@ WORKDIR /usr/src/app
 # where available (npm@5+)
 COPY package*.json ./
 RUN npm install
-RUN npm run build
+RUN npm build
 
 CMD [ "node", "dist/index.js" ]
