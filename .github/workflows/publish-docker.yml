@@ -20,7 +20,6 @@ jobs:
         run: npm install && npm run lint && npm run build && ls -lh ./dist
 
       - name: Read version
-        id: docker-image-version
         run: |
           echo "DOCKER_IMAGE_VERION=$(jq -r '.version' <"$GITHUB_WORKSPACE/package.json")" >> $GITHUB_ENV
 
@@ -49,7 +48,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: $GITHUB_WORKSPACE
+          context: /home/runner/work/fabrica-rest/fabrica-rest
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
