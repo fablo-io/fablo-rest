@@ -1,10 +1,9 @@
 name: Publish docker image
 
-#on:
-#  pull_request:
-#    branches:
-#      - main
-on: [ push ]
+on:
+  push:
+    branches:
+      - 'test-docker-push'
 
 env:
   IMAGE_NAME: ${{ github.repository }}
