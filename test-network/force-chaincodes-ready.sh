@@ -15,6 +15,7 @@ function instantiate() {
 instantiate "cli.org1.com" "peer0.org1.com:7060" &
 instantiate "cli.org1.com" "peer1.org1.com:7061" &
 instantiate "cli.org2.com" "peer0.org2.com:7070" &
+instantiate "cli.org2.com" "peer1.org2.com:7071" &
 
 wait
 echo "All chaincodes ready!"

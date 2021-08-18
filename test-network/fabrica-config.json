@@ -32,7 +32,7 @@
       },
       "peer": {
         "prefix": "peer",
-        "instances": 1,
+        "instances": 2,
         "db": "LevelDb"
       }
     }
@@ -51,7 +51,8 @@
         {
           "name": "Org2",
           "peers": [
-            "peer0"
+            "peer0",
+            "peer1"
           ]
         }
       ]
