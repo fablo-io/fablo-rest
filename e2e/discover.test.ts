@@ -68,7 +68,10 @@ describe("Discover scenario", () => {
               Org1MSP: {
                 peers: [
                   {
-                    chaincodes: [{ name: "chaincode1", version: "0.0.1" }],
+                    chaincodes: [
+                      { name: "chaincode1", version: "1" },
+                      { name: "_lifecycle", version: "1" },
+                    ],
                     endpoint: "peer0.org1.com:7060",
                     ledgerHeight: { high: 0, low: expect.anything(), unsigned: true },
                     mspid: "Org1MSP",
@@ -79,7 +82,10 @@ describe("Discover scenario", () => {
               Org2MSP: {
                 peers: [
                   {
-                    chaincodes: [{ name: "chaincode1", version: "0.0.1" }],
+                    chaincodes: [
+                      { name: "chaincode1", version: "1" },
+                      { name: "_lifecycle", version: "1" },
+                    ],
                     endpoint: "peer0.org2.com:7070",
                     ledgerHeight: { high: 0, low: expect.anything(), unsigned: true },
                     mspid: "Org2MSP",
