@@ -1,6 +1,6 @@
 {
   "name": "fabrica-rest",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "REST API client for Hyperledger Fabric chaincodes",
   "author": {
     "name": "Jakub Dzikowski",
