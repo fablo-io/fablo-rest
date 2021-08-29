@@ -40,6 +40,7 @@ app.post("/user/reenroll", async (req, res) => {
   try {
     const enrollResp = await ca.reenroll(caller.user, []);
     const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, config.MSP_ID);
+    IdentityCache.del(caller.token);
     res.status(200).send({ token });
   } catch (e) {
     res.status(400).send({ message: e.message });

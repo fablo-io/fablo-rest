@@ -77,6 +77,23 @@ describe("Enrollment", () => {
       }),
     );
   });
+
+  it("should not allow to perform action with old token invalidated by reenrollment", async () => {
+    // given
+    const { token } = await enrollAdmin();
+    await post("/user/reenroll", {}, { Authorization: token });
+
+    // when
+    const response = await post("/user/register", { id: uuid.v1(), secret: "aaabbbccc" }, { Authorization: token });
+
+    // Then
+    expect(response).toEqual(
+      expect.objectContaining({
+        status: 403,
+        body: { message: "User with provided token is not enrolled" },
+      }),
+    );
+  });
 });
 
 describe("Registration", () => {
