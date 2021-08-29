@@ -16,7 +16,7 @@ app.use((_req, res, next) => {
   next();
 });
 
-const ca = new FabricCAServices(config.FABRIC_CA_URL);
+const ca = new FabricCAServices(config.FABRIC_CA_URL, undefined, config.FABRIC_CA_NAME);
 
 app.post("/user/enroll", async (req, res) => {
   const id: string = req.body.id;
@@ -25,6 +25,20 @@ app.post("/user/enroll", async (req, res) => {
 
   try {
     const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
+    const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, config.MSP_ID);
+    res.status(200).send({ token });
+  } catch (e) {
+    res.status(400).send({ message: e.message });
+  }
+});
+
+app.post("/user/reenroll", async (req, res) => {
+  const caller = await Authorization.getFromToken(req, res);
+  const id = caller.user.getName();
+  console.log("Re enrolling user", id);
+
+  try {
+    const enrollResp = await ca.reenroll(caller.user, []);
     const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, config.MSP_ID);
     res.status(200).send({ token });
   } catch (e) {
@@ -49,6 +63,22 @@ app.post("/user/register", async (req, res) => {
   try {
     await ca.register(registerRequest, caller.user);
     return res.status(201).send({ message: "ok" });
+  } catch (e) {
+    return res.status(400).send({ message: e.message });
+  }
+});
+
+app.get("/user/identities", async (req, res) => {
+  const caller = await Authorization.getFromToken(req, res);
+  console.log("Retrieving user list for user", caller.user.getName());
+
+  try {
+    const response = await ca.newIdentityService().getAll(caller.user);
+    if (response.result) {
+      return res.status(200).send({ response: response.result });
+    } else {
+      return res.status(400).send({ ...response, message: "Cannot get identities" });
+    }
   } catch (e) {
     return res.status(400).send({ message: e.message });
   }

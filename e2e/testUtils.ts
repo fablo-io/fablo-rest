@@ -22,6 +22,19 @@ export const post = (
     }),
   }));
 
+export const get = (path: string, headers: Record<string, string> = {}): Promise<{ body: any; status: number }> =>
+  fetch(`${serverPath}${path}`, {
+    method: "get",
+    headers: { "content-type": "application/json", ...headers },
+  }).then(async (resp) => ({
+    status: resp.status,
+    body: await resp.json().catch(async (e) => {
+      console.error(e);
+      console.log(resp);
+      return {};
+    }),
+  }));
+
 const adminCredentials = { id: "admin", secret: "adminpw" };
 
 const enroll = async (credentials: { id: string; secret: string }): Promise<{ token: string }> => {
@@ -38,7 +51,7 @@ const enroll = async (credentials: { id: string; secret: string }): Promise<{ to
   return { token };
 };
 
-const enrollAdmin = async (): Promise<{ token: string }> => enroll(adminCredentials);
+export const enrollAdmin = async (): Promise<{ token: string }> => enroll(adminCredentials);
 
 export const generateRegisteredUser = async (): Promise<{ id: string; secret: string }> => {
   const credentials = { id: `user-${uuid.v1()}`, secret: `secret-${uuid.v1()}` };
