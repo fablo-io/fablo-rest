@@ -1,7 +1,8 @@
 import * as uuid from "uuid";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { post, generateRegisteredUser, generateEnrolledUser } from "./testUtils";
+import { post, generateRegisteredUser, generateEnrolledUser, enrollAdmin, get } from "./testUtils";
+import config from "../src/config";
 
 describe("Enrollment", () => {
   it("fail to enroll admin in case of invalid credentials", async () => {
@@ -38,6 +39,60 @@ describe("Enrollment", () => {
     expect(response1).toEqual(responseMatcher);
     expect(response2).not.toEqual(response1);
     expect(response2).toEqual(responseMatcher);
+  });
+
+  it("should allow to reenroll", async () => {
+    // Given
+    const { token } = await generateEnrolledUser();
+
+    // When
+    const response = await post("/user/reenroll", {}, { Authorization: token });
+
+    // Then
+    expect(response).toEqual(
+      expect.objectContaining({
+        status: 200,
+        body: { token: expect.stringMatching(/.*/) },
+      }),
+    );
+  });
+
+  it("should allow to perform user action by reenrolled user", async () => {
+    // given
+    const { token } = await enrollAdmin();
+    const reenrollResponse = await post("/user/reenroll", {}, { Authorization: token });
+
+    // when
+    const response = await post(
+      "/user/register",
+      { id: uuid.v1(), secret: "aaabbbccc" },
+      { Authorization: reenrollResponse.body.token },
+    );
+
+    // Then
+    expect(response).toEqual(
+      expect.objectContaining({
+        status: 201,
+        body: { message: "ok" },
+      }),
+    );
+  });
+
+  it("should not allow to perform action with old token invalidated by reenrollment", async () => {
+    // given
+    const { token } = await enrollAdmin();
+    await post("/user/reenroll", {}, { Authorization: token });
+
+    // when
+    const response = await post("/user/register", { id: uuid.v1(), secret: "aaabbbccc" }, { Authorization: token });
+
+    // Then
+    expect(response).toEqual(
+      expect.objectContaining({
+        status: 403,
+        body: { message: "User with provided token is not enrolled" },
+      }),
+    );
   });
 });
 
@@ -88,6 +143,53 @@ describe("Registration", () => {
             "fabric-ca request register failed with errors [[ { code: 71, message: 'Authorization failure' } ]]",
           ),
         },
+      }),
+    );
+  });
+});
+
+describe("Identities", () => {
+  it("should list identities for an admin", async () => {
+    // Given
+    const { token } = await enrollAdmin();
+    const user = await generateRegisteredUser();
+
+    // When
+    const response = await get("/user/identities", { Authorization: token });
+
+    // Then
+    expect(response).toEqual(
+      expect.objectContaining({
+        status: 200,
+        body: {
+          response: {
+            caname: config.FABRIC_CA_NAME,
+            identities: expect.anything(),
+          },
+        },
+      }),
+    );
+
+    expect(response.body.response.identities).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ affiliation: "", id: "admin", type: "client" }),
+        expect.objectContaining({ affiliation: config.AFFILIATION, id: user.id, type: "client" }),
+      ]),
+    );
+  });
+
+  it("should fail to list identities for a non-admin user", async () => {
+    // Given
+    const { token } = await generateEnrolledUser();
+
+    // When
+    const response = await get("/user/identities", { Authorization: token });
+
+    // Then
+    expect(response).toEqual(
+      expect.objectContaining({
+        status: 400,
+        body: { message: expect.stringContaining("Authorization failure") },
       }),
     );
   });

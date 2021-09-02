@@ -29,6 +29,8 @@ const put = async (name: string, privateKey: ICryptoKey, certificate: string, ms
   return key;
 };
 
+const del = (key: string): number => cache.del(key);
+
 const get = async (key: string): Promise<CachedIdentity | undefined> => cache.get(key);
 
-export default { put, get };
+export default { put, get, del };

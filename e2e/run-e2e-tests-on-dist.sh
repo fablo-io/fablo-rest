@@ -26,6 +26,7 @@ docker run \
   -e AFFILIATION="org2" \
   -e MSP_ID="Org2MSP" \
   -e FABRIC_CA_URL="http://ca.org2.com:7054" \
+  -e FABRIC_CA_NAME="ca.org2.com" \
   -e DISCOVERY_URLS="grpc://peer0.org1.com:7060,grpc://peer0.org2.com:7070" \
   -e AS_LOCALHOST="false" \
   -p "$port:9999" \
@@ -42,4 +43,8 @@ sleep 5
 #
 # Run tests
 #
-PORT=8000 AFFILIATION="org2" MSP_ID="Org2MSP" npm run test-e2e
+PORT=8000 \
+  AFFILIATION="org2" \
+  MSP_ID="Org2MSP" \
+  FABRIC_CA_NAME="ca.org2.com" \
+  npm run test-e2e
