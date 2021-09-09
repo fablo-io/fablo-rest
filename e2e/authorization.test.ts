@@ -194,3 +194,22 @@ describe("Identities", () => {
     );
   });
 });
+
+describe("performance", () => {
+  const length = 25;
+
+  it(`should register ${length} users in parallel`, async () => {
+    // Given
+    const generate = async (i: number) => {
+      const { id } = await generateRegisteredUser();
+      console.log(`(${i}) generated ${id}`);
+      return "OK";
+    };
+
+    // When
+    const results: string[] = await Promise.all(Array.from({ length }, (_, i) => generate(i)));
+
+    // Then
+    expect(results).toEqual(Array.from({ length }, () => "OK"));
+  });
+});
