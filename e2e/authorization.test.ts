@@ -196,6 +196,8 @@ describe("Identities", () => {
 });
 
 describe("performance", () => {
+  jest.setTimeout(30000);
+
   const length = 25;
 
   it(`should register ${length} users in parallel`, async () => {
