@@ -1,6 +1,6 @@
 {
   "name": "fabrica-rest",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "REST API client for Hyperledger Fabric CA and chaincodes",
   "author": {
     "name": "Jakub Dzikowski",
@@ -46,6 +46,7 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@rollup/plugin-typescript": "^8.1.1",
+    "@types/cors": "^2.8.12",
     "@types/jest": "^26.0.20",
     "@types/node-fetch": "^2.5.8",
     "@typescript-eslint/eslint-plugin": "^4.14.2",
@@ -75,6 +76,7 @@
     "@types/express": "^4.17.11",
     "@types/lodash": "^4.14.168",
     "@types/uuid": "^8.3.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "fabric-ca-client": "^2.2.8",
     "fabric-client": "^1.4.18",
