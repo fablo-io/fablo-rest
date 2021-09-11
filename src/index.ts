@@ -1,5 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
+import cors from "cors";
 import FabricCAServices from "fabric-ca-client";
 import NetworkPool from "./NetworkPool";
 import IdentityCache from "./IdentityCache";
@@ -10,6 +11,7 @@ import matches from "ts-matches";
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 app.use((_req, res, next) => {
   res.set("Cache-Control", "no-store");
