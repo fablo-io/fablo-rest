@@ -7,7 +7,7 @@ on:
     types: [closed]
 
 env:
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: softwaremill/fablo-rest
 
 jobs:
   publish-docker-image:
