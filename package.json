@@ -1,6 +1,6 @@
 {
   "name": "fablo-rest",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "REST API client for Hyperledger Fabric CA and chaincodes",
   "author": {
     "name": "Jakub Dzikowski",
