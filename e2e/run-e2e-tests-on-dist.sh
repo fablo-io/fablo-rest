@@ -1,25 +1,25 @@
 #!/usr/bin/env bash
 
 #
-# You need to run './fabrica up' before this script to have running Hyperledger Fabric network
-# and execute ./docker-build.sh script to build fabrica-rest Docker image.
+# You need to run './fablo up' before this script to have running Hyperledger Fabric network
+# and execute ./docker-build.sh script to build fablo-rest Docker image.
 #
 set -e
 
-FABRICA_REST_HOME="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$FABRICA_REST_HOME"
+FABLO_REST_HOME="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$FABLO_REST_HOME"
 
 #
-# Get network name from fabrica-target
+# Get network name from fablo-target
 #
-network_name="$(cat "$FABRICA_REST_HOME/test-network/fabrica-target/fabric-docker/.env" | grep "COMPOSE_PROJECT_NAME=")"
+network_name="$(cat "$FABLO_REST_HOME/test-network/fablo-target/fabric-docker/.env" | grep "COMPOSE_PROJECT_NAME=")"
 network_name="${network_name#*=}_basic"
 echo "Network name: $network_name"
 
 #
 # Start application in the container.
 #
-container=fabrica_rest_test
+container=fablo_rest_test
 port=8000
 docker run \
   -e PORT=9999 \
@@ -34,7 +34,7 @@ docker run \
   -d \
   --rm \
   --name "$container" \
-  softwaremill/fabrica-rest
+  softwaremill/fablo-rest
 
 echo "Started server on container $container at port $port"
 trap "echo 'Stopping container $container' && docker stop $container" EXIT SIGINT ERR

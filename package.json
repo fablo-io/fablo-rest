@@ -1,6 +1,6 @@
 {
-  "name": "fabrica-rest",
-  "version": "0.0.4",
+  "name": "fablo-rest",
+  "version": "0.0.5",
   "description": "REST API client for Hyperledger Fabric CA and chaincodes",
   "author": {
     "name": "Jakub Dzikowski",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/softwaremill/fabrica-rest.git"
+    "url": "git+https://github.com/softwaremill/fablo-rest.git"
   },
   "keywords": [
     "hyperledger fabric",
@@ -19,9 +19,9 @@
   ],
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/softwaremill/fabrica-rest/issues"
+    "url": "https://github.com/softwaremill/fablo-rest/issues"
   },
-  "homepage": "https://github.com/softwaremill/fabrica-rest#readme",
+  "homepage": "https://github.com/softwaremill/fablo-rest#readme",
   "main": "src/index.ts",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",

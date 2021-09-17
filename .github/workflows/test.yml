@@ -7,16 +7,16 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
 
-      - name: Build fabrica-rest
+      - name: Build fablo-rest
         run: npm install && npm run lint && npm run build && ls -lh ./dist
 
-      - name: Build fabrica-rest Docker image
+      - name: Build fablo-rest Docker image
         run: ./docker-build.sh
 
       - name: Start test network
-        run: (ls -lh && cd ./test-network && ./fabrica up)
+        run: (ls -lh && cd ./test-network && ./fablo up)
 
-      - name: Start fabrica-rest as docker container and run e2e tests
+      - name: Start fablo-rest as docker container and run e2e tests
         run: ./e2e/run-e2e-tests-on-dist.sh
 
       - uses: actions/upload-artifact@v2
@@ -29,8 +29,8 @@ jobs:
         if: always()
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_USERNAME: Fabrica-REST CI
-          SLACK_ICON: 'https://raw.githubusercontent.com/softwaremill/fabrica/main/logo-sygnet-192.png'
+          SLACK_USERNAME: Fablo-REST CI
+          SLACK_ICON: 'https://raw.githubusercontent.com/softwaremill/fablo/main/logo-sygnet-192.png'
           SLACK_COLOR: ${{ job.status }} # or a specific color like 'green' or '#ff00ff'
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           MSG_MINIMAL: actions url,commit
