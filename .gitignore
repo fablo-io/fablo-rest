@@ -2,4 +2,4 @@
 dist
 node_modules
 test-network/chaincode-kv-node/node_modules
-test-network/fabrica-target
+test-network/fablo-target
