@@ -11,8 +11,12 @@ const createClient = async (user: User, channelName: string) => {
   const client = Client.newClient(`client-${userId}`);
   const channel = client.getChannel(channelName);
 
-  const connectedDiscoverers = config.DISCOVERY_URLS.map(async (url) => {
-    const endpoint = client.newEndpoint({ url });
+  const connectedDiscoverers = config.discovererConfigs.map(async (config) => {
+    const endpoint = client.newEndpoint({
+      url: config.url,
+      "ssl-target-name-override": config["ssl-target-name-override"],
+      pem: config.pem,
+    });
     const discoverer = client.newDiscoverer(`discoverer-${userId}`);
     await discoverer.connect(endpoint);
     return discoverer;
