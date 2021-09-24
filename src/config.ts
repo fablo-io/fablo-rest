@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 
 const readCertFile = (path: string): string => {
   const buffer = fs.readFileSync(path);
@@ -24,8 +23,8 @@ const getDiscovererConfigs = (urls: string, sslNameOverrides: string, pemPaths: 
     console.log(`Configuring discoverer (url=${url}, ssl-name-override=${name}, pem=${pem})`);
     return {
       url,
-      "ssl-target-name-override": name,
-      pem: readCertFile(pem),
+      "ssl-target-name-override": name && name.length ? name : undefined,
+      pem: pem && pem.length ? readCertFile(pem) : undefined,
     };
   });
 };
@@ -37,12 +36,9 @@ const defaults = {
   FABRIC_CA_URL: "http://localhost:7031",
   FABRIC_CA_NAME: "ca.org1.com",
   AS_LOCALHOST: "true",
-  DISCOVERY_URLS: "grpcs://localhost:7060",
-  DISCOVERY_SSL_TARGET_NAME_OVERRIDES: "peer0.org1.com",
-  DISCOVERY_TLS_CA_CERT_FILES: path.join(
-    __dirname,
-    "../test-network/fablo-target/fabric-config/crypto-config/peerOrganizations/org1.com/peers/peer0.org1.com/tls/ca.crt",
-  ),
+  DISCOVERY_URLS: "grpc://localhost:7060",
+  DISCOVERY_SSL_TARGET_NAME_OVERRIDES: "",
+  DISCOVERY_TLS_CA_CERT_FILES: "",
 };
 
 export default {
