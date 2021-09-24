@@ -1,7 +1,7 @@
 import * as uuid from "uuid";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { post } from "./testUtils";
+import { authorizationHeader, post } from "./testUtils";
 
 jest.setTimeout(10000);
 
@@ -31,7 +31,7 @@ describe("Happy path", () => {
 
   it("should register new user", async () => {
     // When
-    const response = await post("/user/register", userCredentials, { Authorization: adminEnrollToken });
+    const response = await post("/user/register", userCredentials, authorizationHeader(adminEnrollToken));
 
     // Then
     expect(response).toEqual(
@@ -68,7 +68,7 @@ describe("Happy path", () => {
     const response = await post(
       `/invoke/${channelName}/${chaincodeName}`,
       { method, args },
-      { Authorization: userEnrollToken },
+      authorizationHeader(userEnrollToken),
     );
 
     // Then
@@ -91,7 +91,7 @@ describe("Happy path", () => {
     const response = await post(
       `/query/${channelName}/${chaincodeName}`,
       { method, args },
-      { Authorization: userEnrollToken },
+      authorizationHeader(userEnrollToken),
     );
 
     // Then

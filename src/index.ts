@@ -1,17 +1,19 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import bearerToken from "express-bearer-token";
 import FabricCAServices from "fabric-ca-client";
+import matches from "ts-matches";
 import NetworkPool from "./NetworkPool";
 import IdentityCache from "./IdentityCache";
 import config from "./config";
 import Authorization from "./Authorization";
 import ChaincodeRequest from "./ChaincodeRequest";
-import matches from "ts-matches";
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+app.use(bearerToken());
 
 app.use((_req, res, next) => {
   res.set("Cache-Control", "no-store");

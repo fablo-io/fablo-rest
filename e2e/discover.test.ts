@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { generateEnrolledUser, post } from "./testUtils";
+import { authorizationHeader, generateEnrolledUser, post } from "./testUtils";
 
 jest.setTimeout(10000);
 
@@ -13,7 +13,7 @@ describe("Discover scenario", () => {
     const channelName = "my-channel1";
 
     // When
-    const response = await post(`/discover/${channelName}`, {}, { Authorization: token });
+    const response = await post(`/discover/${channelName}`, {}, authorizationHeader(token));
 
     // Then
     expect(response).toEqual(
