@@ -22,7 +22,7 @@
       },
       "peer": {
         "instances": 2,
-        "db": "LevelDb"
+        "anchorPeerInstances": 2
       }
     },
     {
@@ -31,9 +31,8 @@
         "domain": "org2.com"
       },
       "peer": {
-        "prefix": "peer",
         "instances": 2,
-        "db": "LevelDb"
+        "anchorPeerInstances": 2
       }
     }
   ],
@@ -52,6 +51,23 @@
           "name": "Org2",
           "peers": [
             "peer0",
+            "peer1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "my-channel2",
+      "orgs": [
+        {
+          "name": "Org1",
+          "peers": [
+            "peer1"
+          ]
+        },
+        {
+          "name": "Org2",
+          "peers": [
             "peer1"
           ]
         }
