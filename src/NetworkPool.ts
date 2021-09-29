@@ -3,32 +3,16 @@ import { DefaultEventHandlerStrategies, DefaultQueryHandlerStrategies, Gateway, 
 import { Client, User } from "fabric-common";
 import { CachedIdentity } from "./IdentityCache";
 import config from "./config";
+import DiscoveryService from "./DiscoveryService";
 
-const cache = new NodeCache({ stdTTL: 60 * 5, useClones: false });
+const networksCache = new NodeCache({ stdTTL: 60 * 5, useClones: false });
+
+const logger = config.getLogger("FabloRestNetworkPool");
 
 const createClient = async (user: User, channelName: string) => {
   const userId = user.getName();
   const client = Client.newClient(`client-${userId}`);
-  const channel = client.getChannel(channelName);
-
-  const connectedDiscoverers = config.discovererConfigs.map(async (config) => {
-    const endpoint = client.newEndpoint({
-      url: config.url,
-      "ssl-target-name-override": config["ssl-target-name-override"],
-      pem: config.pem,
-    });
-    const discoverer = client.newDiscoverer(`discoverer-${userId}`);
-    await discoverer.connect(endpoint);
-    return discoverer;
-  });
-  const targets = await Promise.all(connectedDiscoverers);
-
-  const identityContext = client.newIdentityContext(user);
-  const discovery = channel.newDiscoveryService(`discovery-service-${userId}`);
-  discovery.build(identityContext);
-  discovery.sign(identityContext);
-  await discovery.send({ targets, asLocalhost: config.AS_LOCALHOST });
-
+  const discovery = await DiscoveryService.create(client, channelName, user);
   return { client, discovery };
 };
 
@@ -61,14 +45,19 @@ const connectToNetwork = async (identity: CachedIdentity, channelName: string): 
 };
 
 const connect = async (identity: CachedIdentity, channelName: string): Promise<Network> => {
+  const loggerParams = `user=${identity.user.getName()}, channel=${channelName}`;
+  logger.debug(`Connecting to network (${loggerParams})`);
+
   const key = `${identity.user.getName()}-${channelName}`;
-  const networkFromCache: Network | undefined = cache.get(key);
+  const networkFromCache: Network | undefined = networksCache.get(key);
 
   if (!networkFromCache) {
+    logger.debug(`Creating new network (${loggerParams})`);
     const network = await connectToNetwork(identity, channelName);
-    cache.set(key, network);
+    networksCache.set(key, network);
     return network;
   } else {
+    logger.debug(`Got network from cache (${loggerParams})`);
     return networkFromCache;
   }
 };

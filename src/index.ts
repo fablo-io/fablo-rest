@@ -9,14 +9,18 @@ import IdentityCache from "./IdentityCache";
 import config from "./config";
 import Authorization from "./Authorization";
 import ChaincodeRequest from "./ChaincodeRequest";
+import { Utils } from "fabric-common";
+
+const logger = Utils.getLogger("FabloRest");
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 app.use(bearerToken());
 
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
   res.set("Cache-Control", "no-store");
+  logger.debug(`${req.method} ${req.path}`);
   next();
 });
 
@@ -108,8 +112,12 @@ const TransactionResult = {
 
 app.post("/discover/:channelName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
-  const response = await NetworkPool.discover(identity.user, req.params.channelName);
-  res.status(200).send({ response });
+  try {
+    const response = await NetworkPool.discover(identity.user, req.params.channelName);
+    res.status(200).send({ response });
+  } catch (e) {
+    res.status(500).send({ message: e.message });
+  }
 });
 
 app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
@@ -136,7 +144,7 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
-  console.log("Querying chaincode", chaincodeReq.method, "by", identity.user.getName());
+  logger.debug("Querying chaincode", chaincodeReq.method, "by", identity.user.getName());
 
   try {
     const transactionResult = await network
@@ -153,5 +161,5 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
 });
 
 app.listen(config.PORT, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${config.PORT} for organization ${config.MSP_ID}`);
+  logger.info(`⚡️[server]: Server is running at https://localhost:${config.PORT} for organization ${config.MSP_ID}`);
 });

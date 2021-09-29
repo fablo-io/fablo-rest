@@ -7,7 +7,7 @@ jest.setTimeout(10000);
 describe("Discover scenario", () => {
   const credentials = generateEnrolledUser();
 
-  it("Get discovery results for channel", async () => {
+  it("should get discovery results for channel", async () => {
     // Given
     const { token } = await credentials;
     const channelName = "my-channel1";
@@ -99,5 +99,47 @@ describe("Discover scenario", () => {
         },
       }),
     );
+  });
+
+  it("should get discovery results for both channels", async () => {
+    /* Rationale: Fabric's DiscoveryService uses first endpoint and fails if, for instance,
+     * given peer did not join the channel. That's why we use a kind of round robin strategy
+     * for service discovery. If one of the peers fail, we did not return error, but query
+     * another one. And this is the thing the test aims to verify.
+     */
+    // Given
+    const { token } = await credentials;
+    const easyChannel = "my-channel1";
+    const hardChannel = "my-channel2";
+    const errorChannel = "my-channel-non-existing";
+
+    const getEndpoints = (response: Record<string, unknown>) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const fromOrg1 = response.body.response.peers_by_org.Org1MSP.peers.map((p) => p.endpoint);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const fromOrg2 = response.body.response.peers_by_org.Org2MSP.peers.map((p) => p.endpoint);
+      return fromOrg1.concat(fromOrg2).sort();
+    };
+
+    // When
+    const easyResponse = await post(`/discover/${easyChannel}`, {}, authorizationHeader(token));
+    const hardResponse = await post(`/discover/${hardChannel}`, {}, authorizationHeader(token));
+    const errorResponse = await post(`/discover/${errorChannel}`, {}, authorizationHeader(token));
+
+    // Then
+    expect(easyResponse).toEqual(expect.objectContaining({ status: 200, body: expect.anything() }));
+    expect(getEndpoints(easyResponse)).toEqual(["peer0.org1.com:7060", "peer0.org2.com:7070", "peer1.org1.com:7061"]);
+
+    expect(hardResponse).toEqual(expect.objectContaining({ status: 200, body: expect.anything() }));
+    expect(getEndpoints(hardResponse)).toEqual(["peer1.org1.com:7061"]);
+
+    expect(errorResponse).toEqual({
+      status: 500,
+      body: {
+        message: `No available discoverers for channel ${errorChannel}`,
+      },
+    });
   });
 });
