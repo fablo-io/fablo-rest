@@ -24,7 +24,6 @@ Use Fablo REST in Docker compose file within the same Docker network as Hyperled
     image: softwaremill/fablo-rest:0.1.0
     environment:
       - PORT=8000
-      - AFFILIATION=Org1
       - MSP_ID=Org1MSP
       - FABRIC_CA_URL=http://ca.org1.com:7054
       - FABRIC_CA_NAME=ca.org1.com
@@ -45,7 +44,6 @@ on `localhost` (+ use TLS):
 
 ```bash
 docker run \
-  -e AFFILIATION="Org2" \
   -e MSP_ID="Org2MSP" \
   -e FABRIC_CA_URL="http://localhost:7054" \
   -e FABRIC_CA_NAME="ca.org2.com" \
@@ -63,7 +61,6 @@ docker run \
 ### Environment variables
 
 * `PORT` - the port under with Fablo REST will be available (default: `8000`).
-* `AFFILIATION` - an affiliation that should be used during user registration (default: `org1`).
 * `MSP_ID` - a Membership Service Provider ID for the organization that runs the Fablo REST instance (
   default: `Org1MSP`).
 * `FABRIC_CA_URL` - an URL to Certificate Authority (CA) instance (default: `http://localhost:7031`).

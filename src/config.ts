@@ -35,7 +35,6 @@ const getDiscovererConfigs = (urls: string, sslNameOverrides: string, pemPaths: 
 
 const defaults: Record<string, string> = {
   PORT: "8000",
-  AFFILIATION: "org1",
   MSP_ID: "Org1MSP",
   FABRIC_CA_URL: "http://localhost:7031",
   FABRIC_CA_NAME: "ca.org1.com",
@@ -56,7 +55,6 @@ const getOrDefault = (key: string): string => {
 
 export default {
   PORT: getOrDefault("PORT"),
-  AFFILIATION: getOrDefault("AFFILIATION"),
   MSP_ID: getOrDefault("MSP_ID"),
   FABRIC_CA_URL: getOrDefault("FABRIC_CA_URL"),
   FABRIC_CA_NAME: getOrDefault("FABRIC_CA_NAME"),

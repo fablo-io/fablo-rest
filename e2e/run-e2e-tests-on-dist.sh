@@ -23,7 +23,6 @@ container=fablo_rest_test
 port=8000
 docker run \
   -e PORT=9999 \
-  -e AFFILIATION="org2" \
   -e MSP_ID="Org2MSP" \
   -e FABRIC_CA_URL="http://ca.org2.com:7054" \
   -e FABRIC_CA_NAME="ca.org2.com" \
@@ -46,7 +45,6 @@ sleep 5
 # Run tests
 #
 PORT=8000 \
-  AFFILIATION="org2" \
   MSP_ID="Org2MSP" \
   FABRIC_CA_NAME="ca.org2.com" \
   npm run test-e2e

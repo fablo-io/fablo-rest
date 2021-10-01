@@ -14,7 +14,7 @@ const invokeHistory = (token: string, arg1: string) =>
 jest.setTimeout(10000);
 
 describe("Invoke", () => {
-  // todo: this test fails sometimes (dunno why)
+  // todo: this test fails sometimes (to be resolved)
   it.skip("invoke concurrently (MVCC failure)", async () => {
     // Given
     const { token } = await generateEnrolledUser();
