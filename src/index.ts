@@ -3,13 +3,13 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import bearerToken from "express-bearer-token";
 import FabricCAServices from "fabric-ca-client";
-import matches from "ts-matches";
 import NetworkPool from "./NetworkPool";
 import IdentityCache from "./IdentityCache";
 import config from "./config";
 import Authorization from "./Authorization";
 import ChaincodeRequest from "./ChaincodeRequest";
 import { Utils } from "fabric-common";
+import TransactionResult from "./TransactionResult";
 
 const logger = Utils.getLogger("FabloRest");
 
@@ -91,23 +91,6 @@ app.get("/user/identities", async (req, res) => {
     return res.status(400).send({ message: e.message });
   }
 });
-
-const payloadWithStatusShape = matches.shape({ status: matches.natural, payload: matches.any });
-
-const TransactionResult = {
-  parse: (b: Buffer): { status: number; response: any } => {
-    try {
-      const payload: Record<string, any> = JSON.parse(b.toString());
-      if (payloadWithStatusShape.test(payload)) {
-        return { status: payload.status, response: payload.payload };
-      } else {
-        return { status: 200, response: payload };
-      }
-    } catch (_e) {
-      return { status: 200, response: b.toString() };
-    }
-  },
-};
 
 app.post("/discover/:channelName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
