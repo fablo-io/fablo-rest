@@ -29,7 +29,7 @@ const ca = new FabricCAServices(config.FABRIC_CA_URL, undefined, config.FABRIC_C
 app.post("/user/enroll", async (req, res) => {
   const id: string = req.body.id;
   const secret: string = req.body.secret;
-  console.log("Enrolling as", id);
+  logger.debug("Enrolling as user %s", id);
 
   try {
     const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
@@ -43,7 +43,7 @@ app.post("/user/enroll", async (req, res) => {
 app.post("/user/reenroll", async (req, res) => {
   const caller = await Authorization.getFromToken(req, res);
   const id = caller.user.getName();
-  console.log("Re enrolling user", id);
+  logger.debug("Re enrolling user %s", id);
 
   try {
     const enrollResp = await ca.reenroll(caller.user, []);
@@ -57,10 +57,9 @@ app.post("/user/reenroll", async (req, res) => {
 
 app.post("/user/register", async (req, res) => {
   const caller = await Authorization.getFromToken(req, res);
-
   const id = req.body.id;
   const secret = req.body.secret;
-  console.log("Registering", id, "by", caller.user.getName());
+  logger.debug("Registering user %s by %s", id, caller.user.getName());
 
   const registerRequest = {
     enrollmentID: id,
@@ -79,7 +78,7 @@ app.post("/user/register", async (req, res) => {
 
 app.get("/user/identities", async (req, res) => {
   const caller = await Authorization.getFromToken(req, res);
-  console.log("Retrieving user list for user", caller.user.getName());
+  logger.debug("Retrieving user list for user %s", caller.user.getName());
 
   try {
     const response = await ca.newIdentityService().getAll(caller.user);
@@ -124,7 +123,7 @@ app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
-  console.log("Invoking chaincode", chaincodeReq.method, "by", identity.user.getName());
+  logger.debug("Invoking chaincode %s by user %s", chaincodeReq.method, identity.user.getName());
 
   try {
     const transactionResult = await network
@@ -144,7 +143,7 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
-  logger.debug("Querying chaincode", chaincodeReq.method, "by", identity.user.getName());
+  logger.debug("Querying chaincode %s by user %s", chaincodeReq.method, identity.user.getName());
 
   try {
     const transactionResult = await network
