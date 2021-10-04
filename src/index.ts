@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import cors from "cors";
 import bearerToken from "express-bearer-token";
 import FabricCAServices from "fabric-ca-client";
@@ -11,7 +10,7 @@ import Authorization from "./Authorization";
 import ChaincodeRequest from "./ChaincodeRequest";
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json({ type: () => "json" }));
 app.use(cors());
 app.use(bearerToken());
 
