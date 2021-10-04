@@ -24,7 +24,6 @@ Use Fablo REST in Docker compose file within the same Docker network as Hyperled
     image: softwaremill/fablo-rest:0.1.0
     environment:
       - PORT=8000
-      - AFFILIATION=Org1
       - MSP_ID=Org1MSP
       - FABRIC_CA_URL=http://ca.org1.com:7054
       - FABRIC_CA_NAME=ca.org1.com
@@ -45,7 +44,6 @@ on `localhost` (+ use TLS):
 
 ```bash
 docker run \
-  -e AFFILIATION="Org2" \
   -e MSP_ID="Org2MSP" \
   -e FABRIC_CA_URL="http://localhost:7054" \
   -e FABRIC_CA_NAME="ca.org2.com" \
@@ -55,6 +53,24 @@ docker run \
   -e AS_LOCALHOST="true" \
   -p "8000:8000" \
   -v "/some/path/fabric-config/crypto-config/peerOrganizations:/peer-crypto" \
+  -d \
+  --rm \
+  softwaremill/fablo-rest:0.1.0
+```
+
+### Running example 3
+
+Start Fablo REST as a Docker container and join some Docker network:
+
+```bash
+docker run \
+  -e MSP_ID="Org1MSP" \
+  -e FABRIC_CA_URL="http://ca.org1.com:7054" \
+  -e FABRIC_CA_NAME="ca.org1.com" \
+  -e DISCOVERY_URLS="grpc://peer0.org1.com:7060,grpc://peer0.org2.com:7060" \
+  -e AS_LOCALHOST="false" \
+  -p "8000:8000" \
+  --network="$docker_network_name" \
   -d \
   --rm \
   softwaremill/fablo-rest:0.1.0
@@ -89,19 +105,13 @@ docker run \
 
 Enrolls an identity in the CA and returns Fablo REST authorization token.
 
-#### Headers
+#### Request
 
-```
-Content-Type: application/json
-```
-
-#### Body
-
-```json
-{
-  "id": "<user-id>",
-  "secret": "<user-secret>"
-}
+```bash
+curl --request POST \
+  --url http://localhost:8000/user/enroll \
+  --header 'Authorization: Bearer ' \
+  --data '{"id": "<user-id>", "secret": "<user-secret>"}'
 ```
 
 #### Response body
@@ -116,11 +126,12 @@ Content-Type: application/json
 
 Reenrolls an identity in the CA, returns new Fablo REST authorization token and invalidates the previous one.
 
-#### Headers
+#### Request
 
-```
-Content-Type: application/json
-Authorization: Bearer <authorization-token>
+```bash
+curl --request POST \
+  --url http://localhost:8000/user/reenroll \
+  --header 'Authorization: Bearer <authorization-token>'
 ```
 
 #### Response body
@@ -135,20 +146,13 @@ Authorization: Bearer <authorization-token>
 
 Registers an identity in the CA. Requires an admin user.
 
-#### Headers
+#### Request
 
-```
-Content-Type: application/json
-Authorization: Bearer <authorization-token>
-```
-
-#### Body
-
-```json
-{
-  "id": "<user-id>",
-  "secret": "<user-secret>"
-}
+```bash
+curl --request POST \
+  --url http://localhost:8000/user/register \
+  --header 'Authorization: Bearer <authorization-token>'
+  --data '{"id": "<user-id>", "secret": "<user-secret>"}'
 ```
 
 #### Response body
@@ -163,11 +167,12 @@ Authorization: Bearer <authorization-token>
 
 Returns a list of identities saved in the CA. Requires an admin user.
 
-#### Headers
+#### Request
 
-```
-Content-Type: application/json
-Authorization: Bearer <authorization-token>
+```bash
+curl --request GET \
+  --url http://localhost:8000/user/identities \
+  --header 'Authorization: Bearer <authorization-token>'
 ```
 
 #### Response body
@@ -195,11 +200,12 @@ Authorization: Bearer <authorization-token>
 Runs service discovery for given `channel` and returns the discovery results. It uses kind of "round robin" strategy for
 the discovery. If a discovery peer is not available for discovery for the given channel, it tries another one.
 
-#### Headers
+#### Request
 
-```
-Content-Type: application/json
-Authorization: Bearer <authorization-token>
+```bash
+curl --request POST \
+  --url http://localhost:8000/discover/my-channel1 \
+  --header 'Authorization: Bearer <authorization-token>'
 ```
 
 #### Response body
@@ -212,32 +218,31 @@ the example in the [discovery e2e tests](https://github.com/softwaremill/fablo-r
 Invokes or queries the `chaincode` on a given `channel`. It uses `MSPID_SCOPE_ALLFORTX` strategy for invoke
 and `MSPID_SCOPE_ROUND_ROBIN` strategy for query.
 
-#### Headers
+### Request
 
-```
-Content-Type: application/json
-Authorization: Bearer <authorization-token>
-```
-
-#### Body
-
-```json
-{
-  "method": "<ContractClass:method>",
-  "args": [
-    "arg1",
-    "arg2",
-    ...
-  ],
-  "transient": {
-    "<key>": "<value>",
-    ...
-  }
-}
+```bash
+curl --request POST \
+  --url http://localhost:8000/invoke/my-channel1/chaincode1 \
+  --header 'Authorization: Bearer <authorization-token>'
+  --data "{
+    \"method\": \"<ContractClass:method>\",
+    \"args\": [
+      \"arg1\",
+      \"arg2\",
+      ...
+    ],
+    \"transient\": {
+      \"<key>\": \"<value>\",
+      ...
+    }
+  }"
 ```
 
-Field `transient` is optional and it contains an object with string keys and string values. You don't need to encode the
-stings in Base64 format, Fablo REST will do it for you.
+You may use `invoke` and `query` interchangeably (the rest of the request is the same), but remember that `query`
+requests do not modify the blockchain.
+
+Field `transient` is optional, and it contains an object with string keys and string values. You don't need to encode
+the stings in Base64 format, Fablo REST will do it for you.
 
 #### Response body
 
