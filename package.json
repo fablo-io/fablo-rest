@@ -72,8 +72,7 @@
   },
   "peerDependencies": {},
   "dependencies": {
-    "@types/body-parser": "^1.19.0",
-    "@types/express": "^4.17.11",
+    "@types/express": "^4.17.13",
     "@types/lodash": "^4.14.168",
     "@types/uuid": "^8.3.0",
     "cors": "^2.8.5",
