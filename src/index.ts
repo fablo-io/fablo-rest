@@ -64,7 +64,7 @@ app.post("/user/register", async (req, res) => {
   const registerRequest = {
     enrollmentID: id,
     enrollmentSecret: secret,
-    affiliation: config.AFFILIATION,
+    affiliation: "", // not supported yet
     maxEnrollments: 0,
   };
 
