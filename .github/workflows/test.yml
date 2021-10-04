@@ -10,6 +10,9 @@ jobs:
       - name: Build fablo-rest
         run: npm install && npm run lint && npm run build && ls -lh ./dist
 
+      - name: Run unit tests
+        run: npm run test
+
       - name: Build fablo-rest Docker image
         run: ./docker-build.sh
 

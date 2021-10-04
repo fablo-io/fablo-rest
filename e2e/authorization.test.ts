@@ -172,8 +172,8 @@ describe("Identities", () => {
 
     expect(response.body.response.identities).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ affiliation: "", id: "admin", type: "client" }),
-        expect.objectContaining({ affiliation: config.AFFILIATION, id: user.id, type: "client" }),
+        expect.objectContaining({ id: "admin", type: "client" }),
+        expect.objectContaining({ id: user.id, type: "client" }),
       ]),
     );
   });

@@ -32,7 +32,7 @@
     "start-dist": "NODE_ENV=production node dist/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "test-e2e": "jest -i ./e2e",
-    "test": "jest --debug --watch",
+    "test": "jest ./src",
     "test-once": "jest"
   },
   "husky": {
@@ -84,6 +84,7 @@
     "lodash": "^4.17.21",
     "node-cache": "^5.1.2",
     "ts-matches": "^4.0.2",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^2.4.5"
   }
 }

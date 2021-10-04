@@ -2,20 +2,24 @@ import express from "express";
 import cors from "cors";
 import bearerToken from "express-bearer-token";
 import FabricCAServices from "fabric-ca-client";
-import matches from "ts-matches";
 import NetworkPool from "./NetworkPool";
 import IdentityCache from "./IdentityCache";
 import config from "./config";
 import Authorization from "./Authorization";
 import ChaincodeRequest from "./ChaincodeRequest";
+import { Utils } from "fabric-common";
+import TransactionResult from "./TransactionResult";
+
+const logger = Utils.getLogger("FabloRest");
 
 const app = express();
 app.use(express.json({ type: () => "json" }));
 app.use(cors());
 app.use(bearerToken());
 
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
   res.set("Cache-Control", "no-store");
+  logger.debug(`${req.method} ${req.path}`);
   next();
 });
 
@@ -24,7 +28,7 @@ const ca = new FabricCAServices(config.FABRIC_CA_URL, undefined, config.FABRIC_C
 app.post("/user/enroll", async (req, res) => {
   const id: string = req.body.id;
   const secret: string = req.body.secret;
-  console.log("Enrolling as", id);
+  logger.debug("Enrolling as user %s", id);
 
   try {
     const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
@@ -38,7 +42,7 @@ app.post("/user/enroll", async (req, res) => {
 app.post("/user/reenroll", async (req, res) => {
   const caller = await Authorization.getFromToken(req, res);
   const id = caller.user.getName();
-  console.log("Re enrolling user", id);
+  logger.debug("Re enrolling user %s", id);
 
   try {
     const enrollResp = await ca.reenroll(caller.user, []);
@@ -52,15 +56,14 @@ app.post("/user/reenroll", async (req, res) => {
 
 app.post("/user/register", async (req, res) => {
   const caller = await Authorization.getFromToken(req, res);
-
   const id = req.body.id;
   const secret = req.body.secret;
-  console.log("Registering", id, "by", caller.user.getName());
+  logger.debug("Registering user %s by %s", id, caller.user.getName());
 
   const registerRequest = {
     enrollmentID: id,
     enrollmentSecret: secret,
-    affiliation: config.AFFILIATION,
+    affiliation: "", // not supported yet
     maxEnrollments: 0,
   };
 
@@ -74,7 +77,7 @@ app.post("/user/register", async (req, res) => {
 
 app.get("/user/identities", async (req, res) => {
   const caller = await Authorization.getFromToken(req, res);
-  console.log("Retrieving user list for user", caller.user.getName());
+  logger.debug("Retrieving user list for user %s", caller.user.getName());
 
   try {
     const response = await ca.newIdentityService().getAll(caller.user);
@@ -88,34 +91,21 @@ app.get("/user/identities", async (req, res) => {
   }
 });
 
-const payloadWithStatusShape = matches.shape({ status: matches.natural, payload: matches.any });
-
-const TransactionResult = {
-  parse: (b: Buffer): { status: number; response: any } => {
-    try {
-      const payload: Record<string, any> = JSON.parse(b.toString());
-      if (payloadWithStatusShape.test(payload)) {
-        return { status: payload.status, response: payload.payload };
-      } else {
-        return { status: 200, response: payload };
-      }
-    } catch (_e) {
-      return { status: 200, response: b.toString() };
-    }
-  },
-};
-
 app.post("/discover/:channelName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
-  const response = await NetworkPool.discover(identity.user, req.params.channelName);
-  res.status(200).send({ response });
+  try {
+    const response = await NetworkPool.discover(identity.user, req.params.channelName);
+    res.status(200).send({ response });
+  } catch (e) {
+    res.status(500).send({ message: e.message });
+  }
 });
 
 app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
-  console.log("Invoking chaincode", chaincodeReq.method, "by", identity.user.getName());
+  logger.debug("Invoking chaincode %s by user %s", chaincodeReq.method, identity.user.getName());
 
   try {
     const transactionResult = await network
@@ -135,7 +125,7 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
-  console.log("Querying chaincode", chaincodeReq.method, "by", identity.user.getName());
+  logger.debug("Querying chaincode %s by user %s", chaincodeReq.method, identity.user.getName());
 
   try {
     const transactionResult = await network
@@ -152,5 +142,5 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
 });
 
 app.listen(config.PORT, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${config.PORT} for organization ${config.MSP_ID}`);
+  logger.info(`⚡️[server]: Server is running at https://localhost:${config.PORT} for organization ${config.MSP_ID}`);
 });

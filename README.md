@@ -79,7 +79,6 @@ docker run \
 ### Environment variables
 
 * `PORT` - the port under with Fablo REST will be available (default: `8000`).
-* `AFFILIATION` - an affiliation that should be used during user registration (default: `org1`).
 * `MSP_ID` - a Membership Service Provider ID for the organization that runs the Fablo REST instance (
   default: `Org1MSP`).
 * `FABRIC_CA_URL` - an URL to Certificate Authority (CA) instance (default: `http://localhost:7031`).
