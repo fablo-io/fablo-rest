@@ -10,11 +10,14 @@ jobs:
       - name: Build fablo-rest
         run: npm install && npm run lint && npm run build && ls -lh ./dist
 
+      - name: Run unit tests
+        run: npm run test
+
       - name: Build fablo-rest Docker image
         run: ./docker-build.sh
 
       - name: Start test network
-        run: (ls -lh && cd ./test-network && ./fablo up)
+        run: (ls -lh && cd ./test-network && ./fablo up fablo-config-tls.json)
 
       - name: Start fablo-rest as docker container and run e2e tests
         run: ./e2e/run-e2e-tests-on-dist.sh

@@ -1,6 +1,6 @@
 {
   "name": "fablo-rest",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "REST API client for Hyperledger Fabric CA and chaincodes",
   "author": {
     "name": "Jakub Dzikowski",
@@ -32,7 +32,7 @@
     "start-dist": "NODE_ENV=production node dist/index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "test-e2e": "jest -i ./e2e",
-    "test": "jest --debug --watch",
+    "test": "jest ./src",
     "test-once": "jest"
   },
   "husky": {
@@ -72,18 +72,19 @@
   },
   "peerDependencies": {},
   "dependencies": {
-    "@types/body-parser": "^1.19.0",
-    "@types/express": "^4.17.11",
+    "@types/express": "^4.17.13",
     "@types/lodash": "^4.14.168",
     "@types/uuid": "^8.3.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-bearer-token": "^2.4.0",
     "fabric-ca-client": "^2.2.8",
     "fabric-client": "^1.4.18",
     "fabric-network": "^2.2.8",
     "lodash": "^4.17.21",
     "node-cache": "^5.1.2",
     "ts-matches": "^4.0.2",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^2.4.5"
   }
 }

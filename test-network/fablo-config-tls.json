@@ -2,7 +2,7 @@
   "$schema": "https://github.com/softwaremill/fablo/releases/download/0.2.0/schema.json",
   "networkSettings": {
     "fabricVersion": "2.3.2",
-    "tls": false
+    "tls": true
   },
   "rootOrg": {
     "organization": {
@@ -10,7 +10,7 @@
       "domain": "root.com"
     },
     "orderer": {
-      "type": "solo",
+      "type": "raft",
       "instances": 1
     }
   },

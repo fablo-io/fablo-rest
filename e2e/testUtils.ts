@@ -51,12 +51,14 @@ const enroll = async (credentials: { id: string; secret: string }): Promise<{ to
   return { token };
 };
 
+export const authorizationHeader = (token: string): { Authorization: string } => ({ Authorization: `Bearer ${token}` });
+
 export const enrollAdmin = async (): Promise<{ token: string }> => enroll(adminCredentials);
 
 export const generateRegisteredUser = async (): Promise<{ id: string; secret: string }> => {
   const credentials = { id: `user-${uuid.v1()}`, secret: `secret-${uuid.v1()}` };
   const enrolledAdmin = await enrollAdmin();
-  const response = await post("/user/register", credentials, { Authorization: enrolledAdmin.token });
+  const response = await post("/user/register", credentials, authorizationHeader(enrolledAdmin.token));
 
   expect(response).toEqual(
     expect.objectContaining({
@@ -89,7 +91,7 @@ export const callDefaultChaincode = async (
   const response = await post(
     `/${type}/${channelName}/${chaincodeName}`,
     { method, args, transient },
-    { Authorization: token },
+    authorizationHeader(token),
   );
 
   console.log("--- end", req, type, method);

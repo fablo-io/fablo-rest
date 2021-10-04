@@ -1,7 +1,7 @@
 import * as uuid from "uuid";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { post, generateRegisteredUser, generateEnrolledUser, enrollAdmin, get } from "./testUtils";
+import { post, generateRegisteredUser, generateEnrolledUser, enrollAdmin, get, authorizationHeader } from "./testUtils";
 import config from "../src/config";
 
 describe("Enrollment", () => {
@@ -46,7 +46,7 @@ describe("Enrollment", () => {
     const { token } = await generateEnrolledUser();
 
     // When
-    const response = await post("/user/reenroll", {}, { Authorization: token });
+    const response = await post("/user/reenroll", {}, authorizationHeader(token));
 
     // Then
     expect(response).toEqual(
@@ -60,13 +60,13 @@ describe("Enrollment", () => {
   it("should allow to perform user action by reenrolled user", async () => {
     // given
     const { token } = await enrollAdmin();
-    const reenrollResponse = await post("/user/reenroll", {}, { Authorization: token });
+    const reenrollResponse = await post("/user/reenroll", {}, authorizationHeader(token));
 
     // when
     const response = await post(
       "/user/register",
       { id: uuid.v1(), secret: "aaabbbccc" },
-      { Authorization: reenrollResponse.body.token },
+      authorizationHeader(reenrollResponse.body.token),
     );
 
     // Then
@@ -81,10 +81,10 @@ describe("Enrollment", () => {
   it("should not allow to perform action with old token invalidated by reenrollment", async () => {
     // given
     const { token } = await enrollAdmin();
-    await post("/user/reenroll", {}, { Authorization: token });
+    await post("/user/reenroll", {}, authorizationHeader(token));
 
     // when
-    const response = await post("/user/register", { id: uuid.v1(), secret: "aaabbbccc" }, { Authorization: token });
+    const response = await post("/user/register", { id: uuid.v1(), secret: "aaabbbccc" }, authorizationHeader(token));
 
     // Then
     expect(response).toEqual(
@@ -115,7 +115,7 @@ describe("Registration", () => {
     const response = await post(
       "/user/register",
       { id: uuid.v1(), secret: "aaabbbccc" },
-      { Authorization: "invalid-header-value" },
+      authorizationHeader("invalid-token"),
     );
 
     // Then
@@ -132,7 +132,7 @@ describe("Registration", () => {
     const { token } = await generateEnrolledUser();
 
     // When
-    const response = await post("/user/register", { id: uuid.v1(), secret: "aaabbbccc" }, { Authorization: token });
+    const response = await post("/user/register", { id: uuid.v1(), secret: "aaabbbccc" }, authorizationHeader(token));
 
     // Then
     expect(response).toEqual(
@@ -155,7 +155,7 @@ describe("Identities", () => {
     const user = await generateRegisteredUser();
 
     // When
-    const response = await get("/user/identities", { Authorization: token });
+    const response = await get("/user/identities", authorizationHeader(token));
 
     // Then
     expect(response).toEqual(
@@ -172,8 +172,8 @@ describe("Identities", () => {
 
     expect(response.body.response.identities).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ affiliation: "", id: "admin", type: "client" }),
-        expect.objectContaining({ affiliation: config.AFFILIATION, id: user.id, type: "client" }),
+        expect.objectContaining({ id: "admin", type: "client" }),
+        expect.objectContaining({ id: user.id, type: "client" }),
       ]),
     );
   });
@@ -183,7 +183,7 @@ describe("Identities", () => {
     const { token } = await generateEnrolledUser();
 
     // When
-    const response = await get("/user/identities", { Authorization: token });
+    const response = await get("/user/identities", authorizationHeader(token));
 
     // Then
     expect(response).toEqual(

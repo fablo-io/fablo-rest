@@ -21,14 +21,16 @@ echo "Network name: $network_name"
 #
 container=fablo_rest_test
 port=8000
+discovery_urls="grpcs://peer0.org2.com:7070,grpcs://wrong.org2.com:9999,grpcs://peer1.org2.com:7071"
+discovery_tls_ca_cert_files="/peer-crypto/org2.com/peers/peer0.org2.com/tls/ca.crt,/peer-crypto/org2.com/peers/peer0.org2.com/tls/ca.crt,/peer-crypto/org2.com/peers/peer1.org2.com/tls/ca.crt"
+
 docker run \
   -e PORT=9999 \
-  -e AFFILIATION="org2" \
   -e MSP_ID="Org2MSP" \
   -e FABRIC_CA_URL="http://ca.org2.com:7054" \
   -e FABRIC_CA_NAME="ca.org2.com" \
-  -e DISCOVERY_URLS="grpcs://peer0.org1.com:7060,grpcs://peer0.org2.com:7070" \
-  -e DISCOVERY_TLS_CA_CERT_FILES="/peer-crypto/org1.com/peers/peer0.org1.com/tls/ca.crt,/peer-crypto/org2.com/peers/peer0.org2.com/tls/ca.crt" \
+  -e DISCOVERY_URLS="$discovery_urls" \
+  -e DISCOVERY_TLS_CA_CERT_FILES="$discovery_tls_ca_cert_files" \
   -e AS_LOCALHOST="false" \
   -p "$port:9999" \
   --network="$network_name" \
@@ -45,8 +47,8 @@ sleep 5
 #
 # Run tests
 #
-PORT=8000 \
-  AFFILIATION="org2" \
+PORT=$port \
   MSP_ID="Org2MSP" \
   FABRIC_CA_NAME="ca.org2.com" \
+  DISCOVERY_URLS="$discovery_urls" \
   npm run test-e2e
