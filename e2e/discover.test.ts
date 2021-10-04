@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { authorizationHeader, generateEnrolledUser, post } from "./testUtils";
+import config from "../src/config";
 
 jest.setTimeout(10000);
 
@@ -128,10 +129,17 @@ describe("Discover scenario", () => {
      * another one. And this is the thing the test aims to verify.
      */
     // Given
+    const discoveryEndpoints = config.discovererConfigs.map((d) => d.url);
+    expect(discoveryEndpoints).toEqual([
+      "grpcs://peer0.org2.com:7070", // has access to my-channel1
+      "grpcs://wrong.org2.com:9999", // unavailable
+      "grpcs://peer1.org2.com:7071", // has access to my-channel1 and my-channel2
+    ]);
+
     const { token } = await credentials;
-    const easyChannel = "my-channel1";
-    const hardChannel = "my-channel2";
-    const errorChannel = "my-channel-non-existing";
+    const easyChannel = "my-channel1"; // first discoverer will return the results
+    const hardChannel = "my-channel2"; // third disciverer will return results
+    const errorChannel = "my-channel-non-existing"; // no disciverer will return results
 
     const getEndpoints = (response: Record<string, unknown>) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
