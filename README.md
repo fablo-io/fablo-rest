@@ -39,23 +39,21 @@ Use Fablo REST in Docker compose file within the same Docker network as Hyperled
 
 ### Running example 2
 
-Start Fablo REST as a Docker container connected to some Hyperedger Fabric network that has been started
+Start Fablo REST locally, connected to some Hyperedger Fabric network that has been started
 on `localhost` (+ use TLS):
 
 ```bash
-docker run \
-  -e MSP_ID="Org2MSP" \
-  -e FABRIC_CA_URL="http://localhost:7054" \
-  -e FABRIC_CA_NAME="ca.org2.com" \
-  -e DISCOVERY_URLS="grpcs://localhost:7070,grpcs://localhost:7071" \
-  -e DISCOVERY_SSL_TARGET_NAME_OVERRIDES="peer0.org2.com,peer1.org2.com" \
-  -e DISCOVERY_TLS_CA_CERT_FILES="/peer-crypto/org2.com/peers/peer0.org2.com/tls/ca.crt,/peer-crypto/org2.com/peers/peer1.org2.com/tls/ca.crt" \
-  -e AS_LOCALHOST="true" \
-  -p "8000:8000" \
-  -v "/some/path/fabric-config/crypto-config/peerOrganizations:/peer-crypto" \
-  -d \
-  --rm \
-  softwaremill/fablo-rest:0.1.0
+npm install
+npm run build
+
+MSP_ID="Org2MSP" \
+FABRIC_CA_URL="http://localhost:7054" \
+FABRIC_CA_NAME="ca.org2.com" \
+DISCOVERY_URLS="grpcs://localhost:7070,grpcs://localhost:7071" \
+DISCOVERY_SSL_TARGET_NAME_OVERRIDES="peer0.org2.com,peer1.org2.com" \
+DISCOVERY_TLS_CA_CERT_FILES="./some-path/org2.com/peers/peer0.org2.com/tls/ca.crt,./some-path/org2.com/peers/peer1.org2.com/tls/ca.crt" \
+AS_LOCALHOST="true" \
+npm start-dist
 ```
 
 ### Running example 3
