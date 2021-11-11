@@ -36,10 +36,10 @@ const getDiscovererConfigs = (urls: string, sslNameOverrides: string, pemPaths: 
 const defaults: Record<string, string> = {
   PORT: "8000",
   MSP_ID: "Org1MSP",
-  FABRIC_CA_URL: "http://localhost:7031",
+  FABRIC_CA_URL: "http://localhost:7040",
   FABRIC_CA_NAME: "ca.org1.com",
   AS_LOCALHOST: "true",
-  DISCOVERY_URLS: "grpc://localhost:7060,grpc://localhost:7061",
+  DISCOVERY_URLS: "grpc://localhost:7041,grpc://localhost:7061",
   DISCOVERY_SSL_TARGET_NAME_OVERRIDES: "",
   DISCOVERY_TLS_CA_CERT_FILES: "",
 };
