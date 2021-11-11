@@ -1,20 +1,23 @@
 {
-  "$schema": "https://github.com/softwaremill/fablo/releases/download/0.2.0/schema.json",
+  "$schema": "https://github.com/softwaremill/fablo/releases/download/0.3.0/schema.json",
   "networkSettings": {
     "fabricVersion": "2.3.2",
     "tls": true
   },
-  "rootOrg": {
-    "organization": {
-      "name": "Orderer",
-      "domain": "root.com"
-    },
-    "orderer": {
-      "type": "raft",
-      "instances": 1
-    }
-  },
   "orgs": [
+    {
+      "organization": {
+        "name": "Orderer",
+        "domain": "root.com"
+      },
+      "orderers": [
+        {
+          "groupName": "group1",
+          "type": "solo",
+          "instances": 1
+        }
+      ]
+    },
     {
       "organization": {
         "name": "Org1",

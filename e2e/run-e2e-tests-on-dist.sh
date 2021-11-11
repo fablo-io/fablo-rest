@@ -21,7 +21,7 @@ echo "Network name: $network_name"
 #
 container=fablo_rest_test
 port=8000
-discovery_urls="grpcs://peer0.org2.com:7070,grpcs://wrong.org2.com:9999,grpcs://peer1.org2.com:7071"
+discovery_urls="grpcs://peer0.org2.com:7061,grpcs://wrong.org2.com:9999,grpcs://peer1.org2.com:7062"
 discovery_tls_ca_cert_files="/peer-crypto/org2.com/peers/peer0.org2.com/tls/ca.crt,/peer-crypto/org2.com/peers/peer0.org2.com/tls/ca.crt,/peer-crypto/org2.com/peers/peer1.org2.com/tls/ca.crt"
 
 docker run \

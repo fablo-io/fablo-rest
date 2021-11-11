@@ -58,9 +58,9 @@ describe("Discover scenario", () => {
               OrdererMSP: {
                 endpoints: [
                   {
-                    host: "orderer0.root.com",
-                    name: "orderer0.root.com:7050",
-                    port: 7050,
+                    host: "orderer0.group1.root.com",
+                    name: "orderer0.group1.root.com:7030",
+                    port: 7030,
                   },
                 ],
               },
@@ -73,20 +73,20 @@ describe("Discover scenario", () => {
                       { name: "chaincode1", version: "1" },
                       { name: "_lifecycle", version: "1" },
                     ],
-                    endpoint: "peer0.org1.com:7060",
+                    endpoint: "peer0.org1.com:7041",
                     ledgerHeight: { high: 0, low: expect.anything(), unsigned: true },
                     mspid: "Org1MSP",
-                    name: "peer0.org1.com:7060",
+                    name: "peer0.org1.com:7041",
                   },
                   {
                     chaincodes: [
                       { name: "chaincode1", version: "1" },
                       { name: "_lifecycle", version: "1" },
                     ],
-                    endpoint: "peer1.org1.com:7061",
+                    endpoint: "peer1.org1.com:7042",
                     ledgerHeight: { high: 0, low: expect.anything(), unsigned: true },
                     mspid: "Org1MSP",
-                    name: "peer1.org1.com:7061",
+                    name: "peer1.org1.com:7042",
                   },
                 ]),
               },
@@ -97,20 +97,20 @@ describe("Discover scenario", () => {
                       { name: "chaincode1", version: "1" },
                       { name: "_lifecycle", version: "1" },
                     ],
-                    endpoint: "peer0.org2.com:7070",
+                    endpoint: "peer0.org2.com:7061",
                     ledgerHeight: { high: 0, low: expect.anything(), unsigned: true },
                     mspid: "Org2MSP",
-                    name: "peer0.org2.com:7070",
+                    name: "peer0.org2.com:7061",
                   },
                   {
                     chaincodes: [
                       { name: "chaincode1", version: "1" },
                       { name: "_lifecycle", version: "1" },
                     ],
-                    endpoint: "peer1.org2.com:7071",
+                    endpoint: "peer1.org2.com:7062",
                     ledgerHeight: { high: 0, low: expect.anything(), unsigned: true },
                     mspid: "Org2MSP",
-                    name: "peer1.org2.com:7071",
+                    name: "peer1.org2.com:7062",
                   },
                 ]),
               },
@@ -131,9 +131,9 @@ describe("Discover scenario", () => {
     // Given
     const discoveryEndpoints = config.discovererConfigs.map((d) => d.url);
     expect(discoveryEndpoints).toEqual([
-      "grpcs://peer0.org2.com:7070", // has access to my-channel1
+      "grpcs://peer0.org2.com:7061", // has access to my-channel1
       "grpcs://wrong.org2.com:9999", // unavailable
-      "grpcs://peer1.org2.com:7071", // has access to my-channel1 and my-channel2
+      "grpcs://peer1.org2.com:7062", // has access to my-channel1 and my-channel2
     ]);
 
     const { token } = await credentials;
@@ -159,14 +159,14 @@ describe("Discover scenario", () => {
     // Then
     expect(easyResponse).toEqual(expect.objectContaining({ status: 200, body: expect.anything() }));
     expect(getEndpoints(easyResponse)).toEqual([
-      "peer0.org1.com:7060",
-      "peer0.org2.com:7070",
-      "peer1.org1.com:7061",
-      "peer1.org2.com:7071",
+      "peer0.org1.com:7041",
+      "peer0.org2.com:7061",
+      "peer1.org1.com:7042",
+      "peer1.org2.com:7062",
     ]);
 
     expect(hardResponse).toEqual(expect.objectContaining({ status: 200, body: expect.anything() }));
-    expect(getEndpoints(hardResponse)).toEqual(["peer1.org1.com:7061", "peer1.org2.com:7071"]);
+    expect(getEndpoints(hardResponse)).toEqual(["peer1.org1.com:7042", "peer1.org2.com:7062"]);
 
     expect(errorResponse).toEqual({
       status: 500,
