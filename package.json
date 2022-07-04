@@ -4,8 +4,8 @@
   "description": "REST API client for Hyperledger Fabric CA and chaincodes",
   "author": {
     "name": "Jakub Dzikowski",
-    "email": "jakub.dzikowski@softwaremill.com",
-    "url": "https://github.com/softwaremill"
+    "email": "jakub@dzikowski.online",
+    "url": "https://dzikowski.online"
   },
   "repository": {
     "type": "git",

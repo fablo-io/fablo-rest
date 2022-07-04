@@ -7,7 +7,7 @@ on:
     types: [closed]
 
 env:
-  IMAGE_NAME: softwaremill/fablo-rest
+  IMAGE_NAME: fabloio/fablo-rest
 
 jobs:
   publish-docker-image:

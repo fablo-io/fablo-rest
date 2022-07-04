@@ -4,7 +4,7 @@ set -euo
 
 FABLO_REST_HOME="$(cd "$(dirname "$0")" && pwd)"
 FABLO_REST_VERSION=$(jq -r '.version' <"$FABLO_REST_HOME/package.json")
-DOCKER_IMAGE_BASE_NAME="softwaremill/fablo-rest"
+DOCKER_IMAGE_BASE_NAME="fabloio/fablo-rest"
 DOCKER_IMAGE_TAG="$DOCKER_IMAGE_BASE_NAME:$FABLO_REST_VERSION"
 
 echo "Building new image..."

@@ -3,7 +3,7 @@
 set -e
 
 FABLO_VERSION="0.3.0"
-FABLO_IMAGE_NAME="softwaremill/fablo"
+FABLO_IMAGE_NAME="fabloio/fablo"
 FABLO_IMAGE="$FABLO_IMAGE_NAME:$FABLO_VERSION"
 
 COMMAND="$1"
@@ -108,7 +108,7 @@ useVersion() {
   if [ -n "$version" ]; then
     echo "Updating '$0' to version $version..."
     set +e
-    curl -Lf https://github.com/softwaremill/fablo/releases/download/"$version"/fablo.sh -o "$0" && chmod +x "$0"
+    curl -Lf https://github.com/hyperledger-labs/fablo/releases/download/"$version"/fablo.sh -o "$0" && chmod +x "$0"
   else
     executeOnFabloDocker "fablo:list-versions"
   fi

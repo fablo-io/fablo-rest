@@ -9,9 +9,9 @@ A simple REST API interface for Hyperledger Fabric blockchain network. Supported
 * query and invoke chaincode (with transient parameters support).
 
 Fablo REST should work with any available Hyperledger Fabric network, however it is also integrated
-with [Fablo](https://github.com/softwaremill/fablo), a simple tool to generate the Hyperledger Fabric blockchain network
+with [Fablo](https://github.com/hyperledger-labs/fablo), a simple tool to generate the Hyperledger Fabric blockchain network
 and run it on Docker. It is distributed as the Docker
-image: [`softwaremill/fablo-rest`](https://hub.docker.com/r/softwaremill/fablo-rest).
+image: [`fabloio/fablo-rest`](https://hub.docker.com/r/fabloio/fablo-rest).
 
 ## Running and configuration
 
@@ -21,7 +21,7 @@ Use Fablo REST in Docker compose file within the same Docker network as Hyperled
 
 ```yaml
   fablo-rest.org1.com:
-    image: softwaremill/fablo-rest:0.1.0
+    image: fabloio/fablo-rest:0.1.0
     environment:
       - PORT=8000
       - MSP_ID=Org1MSP
@@ -71,7 +71,7 @@ docker run \
   --network="$docker_network_name" \
   -d \
   --rm \
-  softwaremill/fablo-rest:0.1.0
+  fabloio/fablo-rest:0.1.0
 ```
 
 ### Environment variables
