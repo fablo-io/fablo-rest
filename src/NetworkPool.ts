@@ -7,6 +7,10 @@ import DiscoveryService from "./DiscoveryService";
 
 const networksCache = new NodeCache({ stdTTL: 60 * 5, useClones: false });
 
+networksCache.on("del", (_, value) => {
+  (value as Network)?.getGateway()?.disconnect();
+});
+
 const logger = config.getLogger("FabloRestNetworkPool");
 
 const createClient = async (user: User, channelName: string) => {
