@@ -21,7 +21,7 @@ Use Fablo REST in Docker compose file within the same Docker network as Hyperled
 
 ```yaml
   fablo-rest.org1.com:
-    image: ghcr.io/fablo-io/fablo-rest:0.1.3
+    image: ghcr.io/fablo-io/fablo-rest:0.1.2
     environment:
       - PORT=8000
       - MSP_ID=Org1MSP
@@ -71,7 +71,7 @@ docker run \
   --network="$docker_network_name" \
   -d \
   --rm \
-  ghcr.io/fablo-io/fablo-rest:0.1.3
+  ghcr.io/fablo-io/fablo-rest:0.1.2
 ```
 
 ### Environment variables
