@@ -38,7 +38,7 @@ docker run \
   -d \
   --rm \
   --name "$container" \
-  softwaremill/fablo-rest
+  ghcr.io/fablo-io/fablo-rest
 
 echo "Started server on container $container at port $port"
 trap "echo 'Stopping container $container' && docker stop $container" EXIT SIGINT ERR
