@@ -47,7 +47,7 @@ npm install
 npm run build
 
 MSP_ID="Org2MSP" \
-FABRIC_CA_URL="http://localhost:7054" \
+FABRIC_CA_URL="https://localhost:7054" \
 FABRIC_CA_NAME="ca.org2.com" \
 DISCOVERY_URLS="grpcs://localhost:7070,grpcs://localhost:7071" \
 DISCOVERY_SSL_TARGET_NAME_OVERRIDES="peer0.org2.com,peer1.org2.com" \

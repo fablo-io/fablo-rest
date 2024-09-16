@@ -44,12 +44,12 @@ const getValidOrError = (request: express.Request): { error: string } | Chaincod
 const isError = (reqOrError: { error: string } | ChaincodeRequestT): reqOrError is { error: string } =>
   "error" in reqOrError;
 
-const getValid = (request: express.Request, response: express.Response): ChaincodeRequestT => {
+const getValid = (request: express.Request, response: express.Response): ChaincodeRequestT | undefined => {
   const chaincodeReqOrError = getValidOrError(request);
 
   if (isError(chaincodeReqOrError)) {
     response.status(400).send({ mesage: chaincodeReqOrError.error });
-    throw new Error(chaincodeReqOrError.error);
+    return undefined;
   }
 
   return chaincodeReqOrError;

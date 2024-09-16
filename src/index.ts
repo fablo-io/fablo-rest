@@ -41,6 +41,10 @@ app.post("/user/enroll", async (req, res) => {
 
 app.post("/user/reenroll", async (req, res) => {
   const caller = await Authorization.getFromToken(req, res);
+  if (!caller) {
+    return;
+  }
+
   const id = caller.user.getName();
   logger.debug("Re enrolling user %s", id);
 
@@ -56,6 +60,10 @@ app.post("/user/reenroll", async (req, res) => {
 
 app.post("/user/register", async (req, res) => {
   const caller = await Authorization.getFromToken(req, res);
+  if (!caller) {
+    return;
+  }
+
   const id = req.body.id;
   const secret = req.body.secret;
   logger.debug("Registering user %s by %s", id, caller.user.getName());
@@ -77,6 +85,10 @@ app.post("/user/register", async (req, res) => {
 
 app.get("/user/identities", async (req, res) => {
   const caller = await Authorization.getFromToken(req, res);
+  if (!caller) {
+    return;
+  }
+
   logger.debug("Retrieving user list for user %s", caller.user.getName());
 
   try {
@@ -93,6 +105,11 @@ app.get("/user/identities", async (req, res) => {
 
 app.post("/discover/:channelName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
+
+  if (!identity) {
+    return;
+  }
+
   try {
     const response = await NetworkPool.discover(identity.user, req.params.channelName);
     res.status(200).send({ response });
@@ -104,6 +121,11 @@ app.post("/discover/:channelName", async (req, res) => {
 app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
+
+  if (!identity || !chaincodeReq) {
+    return;
+  }
+
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
   logger.debug("Invoking chaincode %s by user %s", chaincodeReq.method, identity.user.getName());
 
@@ -124,6 +146,11 @@ app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
 app.post("/query/:channelName/:chaincodeName", async (req, res) => {
   const identity = await Authorization.getFromToken(req, res);
   const chaincodeReq = ChaincodeRequest.getValid(req, res);
+
+  if (!identity || !chaincodeReq) {
+    return;
+  }
+
   const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
   logger.debug("Querying chaincode %s by user %s", chaincodeReq.method, identity.user.getName());
 
