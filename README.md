@@ -1,6 +1,6 @@
 # Fablo REST
 
-[![Test](https://github.com/softwaremill/fablo-rest/actions/workflows/test.yml/badge.svg)](https://github.com/softwaremill/fablo-rest/actions/workflows/test.yml)
+[![Test](https://github.com/fablo-io/fablo-rest/actions/workflows/test.yml/badge.svg)](https://github.com/fablo-io/fablo-rest/actions/workflows/test.yml)
 
 A simple REST API interface for Hyperledger Fabric blockchain network. Supported features:
 
@@ -9,9 +9,9 @@ A simple REST API interface for Hyperledger Fabric blockchain network. Supported
 * query and invoke chaincode (with transient parameters support).
 
 Fablo REST should work with any available Hyperledger Fabric network, however it is also integrated
-with [Fablo](https://github.com/softwaremill/fablo), a simple tool to generate the Hyperledger Fabric blockchain network
+with [Fablo](https://github.com/hyperledger-labs/fablo), a simple tool to generate the Hyperledger Fabric blockchain network
 and run it on Docker. It is distributed as the Docker
-image: [`softwaremill/fablo-rest`](https://hub.docker.com/r/softwaremill/fablo-rest).
+image: `ghcr.io/fablo-io/fablo-rest`.
 
 ## Running and configuration
 
@@ -21,7 +21,7 @@ Use Fablo REST in Docker compose file within the same Docker network as Hyperled
 
 ```yaml
   fablo-rest.org1.com:
-    image: softwaremill/fablo-rest:0.1.0
+    image: ghcr.io/fablo-io/fablo-rest:0.1.2
     environment:
       - PORT=8000
       - MSP_ID=Org1MSP
@@ -47,7 +47,7 @@ npm install
 npm run build
 
 MSP_ID="Org2MSP" \
-FABRIC_CA_URL="http://localhost:7054" \
+FABRIC_CA_URL="https://localhost:7054" \
 FABRIC_CA_NAME="ca.org2.com" \
 DISCOVERY_URLS="grpcs://localhost:7070,grpcs://localhost:7071" \
 DISCOVERY_SSL_TARGET_NAME_OVERRIDES="peer0.org2.com,peer1.org2.com" \
@@ -71,7 +71,7 @@ docker run \
   --network="$docker_network_name" \
   -d \
   --rm \
-  softwaremill/fablo-rest:0.1.0
+  ghcr.io/fablo-io/fablo-rest:0.1.2
 ```
 
 ### Environment variables
@@ -208,7 +208,7 @@ curl --request POST \
 #### Response body
 
 JSON with discovery results, containing MSPs, orderers and peers by organizations. This is quite a complex object, see
-the example in the [discovery e2e tests](https://github.com/softwaremill/fablo-rest/blob/main/e2e/discover.test.ts).
+the example in the [discovery e2e tests](https://github.com/fablo-io/fablo-rest/blob/main/e2e/discover.test.ts).
 
 <h3>POST /invoke/:channel/:chaincode<br/>POST /query/:channel/:chaincode</h3>
 
@@ -271,4 +271,4 @@ or other nodes in the network.
 
 ### Sample usage
 
-See more usage examples in our [E2E tests](https://github.com/softwaremill/fablo-rest/tree/main/e2e).
+See more usage examples in our [E2E tests](https://github.com/fablo-io/fablo-rest/tree/main/e2e).

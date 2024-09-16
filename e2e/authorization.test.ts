@@ -4,6 +4,8 @@ import * as uuid from "uuid";
 import { post, generateRegisteredUser, generateEnrolledUser, enrollAdmin, get, authorizationHeader } from "./testUtils";
 import config from "../src/config";
 
+jest.setTimeout(60000);
+
 describe("Enrollment", () => {
   it("fail to enroll admin in case of invalid credentials", async () => {
     // When

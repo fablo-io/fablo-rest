@@ -27,7 +27,7 @@ discovery_tls_ca_cert_files="/peer-crypto/org2.com/peers/peer0.org2.com/tls/ca.c
 docker run \
   -e PORT=9999 \
   -e MSP_ID="Org2MSP" \
-  -e FABRIC_CA_URL="http://ca.org2.com:7054" \
+  -e FABRIC_CA_URL="https://ca.org2.com:7054" \
   -e FABRIC_CA_NAME="ca.org2.com" \
   -e DISCOVERY_URLS="$discovery_urls" \
   -e DISCOVERY_TLS_CA_CERT_FILES="$discovery_tls_ca_cert_files" \
@@ -38,7 +38,7 @@ docker run \
   -d \
   --rm \
   --name "$container" \
-  softwaremill/fablo-rest
+  ghcr.io/fablo-io/fablo-rest
 
 echo "Started server on container $container at port $port"
 trap "echo 'Stopping container $container' && docker stop $container" EXIT SIGINT ERR
