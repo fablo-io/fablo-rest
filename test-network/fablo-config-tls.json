@@ -95,5 +95,8 @@
         }
       ]
     }
-  ]
+  ],
+  "hooks": {
+    "postGenerate": "perl -i -pe 's/docker-compose/docker compose/g' \"./fablo-target/fabric-docker/commands-generated.sh\" && perl -i -pe 's/docker-compose/docker compose/g' \"./fablo-target/fabric-docker/snapshot-scripts.sh\""
+  }
 }
