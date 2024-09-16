@@ -24,13 +24,14 @@ npm run build
 if [ "${1:-''}" = "--push" ]; then
   docker buildx build \
     --build-arg VERSION_DETAILS="$VERSION_DETAILS" \
-    --platform linux/amd64,linux/arm64 \
+    --platform linux/amd64 \
     --tag "$DOCKER_IMAGE_TAG" \
     --push \
     "$FABLO_REST_HOME"
 else
-  docker build \
+  docker buildx build \
     --build-arg VERSION_DETAILS="$VERSION_DETAILS" \
+    --platform linux/amd64 \
     --tag "$DOCKER_IMAGE_TAG" \
     "$FABLO_REST_HOME"
 fi
