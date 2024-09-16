@@ -26,6 +26,7 @@ if [ "${1:-''}" = "--push" ]; then
     --build-arg VERSION_DETAILS="$VERSION_DETAILS" \
     --platform linux/amd64 \
     --tag "$DOCKER_IMAGE_TAG" \
+    --tag "$DOCKER_IMAGE_BASE_NAME:latest" \
     --push \
     "$FABLO_REST_HOME"
 else
@@ -33,6 +34,7 @@ else
     --build-arg VERSION_DETAILS="$VERSION_DETAILS" \
     --platform linux/amd64 \
     --tag "$DOCKER_IMAGE_TAG" \
+    --tag "$DOCKER_IMAGE_BASE_NAME:latest" \
     "$FABLO_REST_HOME"
 fi
 
