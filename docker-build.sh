@@ -24,7 +24,7 @@ npm run build
 if [ "${1:-''}" = "--push" ]; then
   docker buildx build \
     --build-arg VERSION_DETAILS="$VERSION_DETAILS" \
-    --platform linux/amd64 \
+    --platform linux/amd64,linux/arm64 \
     --tag "$DOCKER_IMAGE_TAG" \
     --tag "$DOCKER_IMAGE_BASE_NAME:latest" \
     --push \
