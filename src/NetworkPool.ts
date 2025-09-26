@@ -21,27 +21,23 @@ interface CachedNetwork {
 
 const createGatewayWithEndpoint = (identity: CachedIdentity, dc: any): Gateway => {
   const address = dc.url.replace(/^grpcs?:\/\//, "");
-  const credentials = dc.pem 
-    ? grpc.credentials.createSsl(Buffer.from(dc.pem))
-    : grpc.credentials.createInsecure();
-  
+  const credentials = dc.pem ? grpc.credentials.createSsl(Buffer.from(dc.pem)) : grpc.credentials.createInsecure();
+
   const options: grpc.ClientOptions = {};
   if (dc["ssl-target-name-override"]) {
     options["grpc.ssl_target_name_override"] = dc["ssl-target-name-override"];
   }
-  
+
   const client = new grpc.Client(address, credentials, options);
-  
+
   // Extract from the stored identity object
-  const signer: Signer = signers.newPrivateKeySigner(
-    crypto.createPrivateKey(identity.identity.credentials.privateKey)
-  );
-  
+  const signer: Signer = signers.newPrivateKeySigner(crypto.createPrivateKey(identity.identity.credentials.privateKey));
+
   const gwIdentity: Identity = {
     mspId: identity.identity.mspId,
     credentials: Buffer.from(identity.identity.credentials.certificate),
   };
-  
+
   return connect({
     client,
     identity: gwIdentity,
@@ -58,15 +54,15 @@ const createGateway = (identity: CachedIdentity, channelName: string): Gateway =
   if (configs.length === 0) throw new Error("No discovery endpoints configured");
 
   let lastError: Error | undefined;
-  
+
   for (let i = 0; i < configs.length; i++) {
     try {
       const gateway = createGatewayWithEndpoint(identity, configs[i]);
-      
+
       // Test the connection by attempting to get the network
       // This will fail if the peer doesn't have access to the channel
       gateway.getNetwork(channelName);
-      
+
       logger.debug(`Connected to ${configs[i].url} for channel=${channelName}, user=${identity.user.getName()}`);
       return gateway;
     } catch (e: any) {
@@ -74,19 +70,19 @@ const createGateway = (identity: CachedIdentity, channelName: string): Gateway =
       logger.debug(`Failed to connect to ${configs[i].url} for channel=${channelName}: ${e.message}`);
     }
   }
-  
+
   throw new Error(`No available gateways for channel ${channelName}. Last error: ${lastError?.message}`);
 };
 
 const getNetwork = async (identity: CachedIdentity, channelName: string): Promise<CachedNetwork> => {
   const key = `${identity.user.getName()}-${channelName}`;
   const cached = networksCache.get<CachedNetwork>(key);
-  
+
   if (cached) {
     logger.debug(`Got network from cache (user=${identity.user.getName()}, channel=${channelName})`);
     return cached;
   }
-  
+
   logger.debug(`Creating new network (user=${identity.user.getName()}, channel=${channelName})`);
   const gateway = createGateway(identity, channelName);
   const network = { gateway, channelName };
@@ -107,27 +103,27 @@ const invoke = async (
   chaincodeName: string,
   method: string,
   args: string[],
-  transient?: Record<string, Buffer>
+  transient?: Record<string, Buffer>,
 ): Promise<Buffer> => {
   const { gateway } = await getNetwork(identity, channelName);
   const network = gateway.getNetwork(channelName);
   const contract = network.getContract(chaincodeName);
-  
+
   const proposal = contract.newProposal(method, {
     arguments: args,
     transientData: transient,
   });
-  
+
   const transaction = await proposal.endorse();
   const commit = await transaction.submit();
   const status = await commit.getStatus();
-  
+
   if (status.code !== 0) {
     const error = new Error(`Transaction failed with code ${status.code}`);
     (error as any).transactionCode = status.code.toString();
     throw error;
   }
-  
+
   return Buffer.from(transaction.getResult());
 };
 
@@ -137,7 +133,7 @@ const query = async (
   chaincodeName: string,
   method: string,
   args: string[],
-  transient?: Record<string, Buffer>
+  transient?: Record<string, Buffer>,
 ): Promise<Buffer> => {
   const { gateway } = await getNetwork(identity, channelName);
   const network = gateway.getNetwork(channelName);
@@ -147,7 +143,7 @@ const query = async (
     arguments: args,
     transientData: transient,
   });
-  
+
   const result = await proposal.evaluate();
   return Buffer.from(result);
 };

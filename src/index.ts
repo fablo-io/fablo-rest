@@ -135,7 +135,7 @@ app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
       chaincodeReq.chaincodeName,
       chaincodeReq.method,
       chaincodeReq.args,
-      chaincodeReq.transient
+      chaincodeReq.transient,
     );
 
     const { status, response } = TransactionResult.parse(transactionResult);
@@ -162,7 +162,7 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
       chaincodeReq.chaincodeName,
       chaincodeReq.method,
       chaincodeReq.args,
-      chaincodeReq.transient
+      chaincodeReq.transient,
     );
 
     const { status, response } = TransactionResult.parse(transactionResult);

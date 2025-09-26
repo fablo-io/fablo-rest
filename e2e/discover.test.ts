@@ -75,8 +75,8 @@ describe("Discover scenario", () => {
                     ],
                     endpoint: "peer0.org1.com:7041",
                     ledgerHeight: expect.objectContaining({
-                        high: expect.any(Number),
-                        low: expect.any(Number),
+                      high: expect.any(Number),
+                      low: expect.any(Number),
                     }),
                     mspid: "Org1MSP",
                     name: "peer0.org1.com:7041",
@@ -88,8 +88,8 @@ describe("Discover scenario", () => {
                     ],
                     endpoint: "peer1.org1.com:7042",
                     ledgerHeight: expect.objectContaining({
-                        high: expect.any(Number),
-                        low: expect.any(Number),
+                      high: expect.any(Number),
+                      low: expect.any(Number),
                     }),
                     mspid: "Org1MSP",
                     name: "peer1.org1.com:7042",
@@ -105,8 +105,8 @@ describe("Discover scenario", () => {
                     ],
                     endpoint: "peer0.org2.com:7061",
                     ledgerHeight: expect.objectContaining({
-                        high: expect.any(Number),
-                        low: expect.any(Number),
+                      high: expect.any(Number),
+                      low: expect.any(Number),
                     }),
                     mspid: "Org2MSP",
                     name: "peer0.org2.com:7061",
@@ -118,8 +118,8 @@ describe("Discover scenario", () => {
                     ],
                     endpoint: "peer1.org2.com:7062",
                     ledgerHeight: expect.objectContaining({
-                        high: expect.any(Number),
-                        low: expect.any(Number),
+                      high: expect.any(Number),
+                      low: expect.any(Number),
                     }),
                     mspid: "Org2MSP",
                     name: "peer1.org2.com:7062",
