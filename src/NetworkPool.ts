@@ -1,69 +1,151 @@
 import NodeCache from "node-cache";
-import { DefaultEventHandlerStrategies, DefaultQueryHandlerStrategies, Gateway, Network } from "fabric-network";
+import * as grpc from "@grpc/grpc-js";
+import { connect, Gateway, Identity, Signer, signers } from "@hyperledger/fabric-gateway";
+import crypto from "crypto";
 import { Client, User } from "fabric-common";
 import { CachedIdentity } from "./IdentityCache";
 import config from "./config";
 import DiscoveryService from "./DiscoveryService";
 
 const networksCache = new NodeCache({ stdTTL: 60 * 5, useClones: false });
-
 networksCache.on("del", (_, value) => {
-  (value as Network)?.getGateway()?.disconnect();
+  (value as Gateway)?.close();
 });
 
 const logger = config.getLogger("FabloRestNetworkPool");
 
-const createClient = async (user: User, channelName: string) => {
-  const userId = user.getName();
-  const client = Client.newClient(`client-${userId}`);
-  const discovery = await DiscoveryService.create(client, channelName, user);
-  return { client, discovery };
-};
+interface CachedNetwork {
+  gateway: Gateway;
+  channelName: string;
+}
 
-const discover = async (user: User, channelName: string): Promise<Record<string, any>> => {
-  const { discovery } = await createClient(user, channelName);
-  const results = discovery.getDiscoveryResults(true);
-  return results;
-};
+const createGatewayWithEndpoint = (identity: CachedIdentity, dc: any): Gateway => {
+  const address = dc.url.replace(/^grpcs?:\/\//, "");
+  const credentials = dc.pem ? grpc.credentials.createSsl(Buffer.from(dc.pem)) : grpc.credentials.createInsecure();
 
-const connectToNetwork = async (identity: CachedIdentity, channelName: string): Promise<Network> => {
-  const { client } = await createClient(identity.user, channelName);
-  const gateway = new Gateway();
+  const options: grpc.ClientOptions = {};
+  if (dc["ssl-target-name-override"]) {
+    options["grpc.ssl_target_name_override"] = dc["ssl-target-name-override"];
+  }
 
-  await gateway.connect(client, {
-    identity: identity.identity,
-    discovery: {
-      asLocalhost: config.AS_LOCALHOST,
-      enabled: true,
-    },
-    eventHandlerOptions: {
-      strategy: DefaultEventHandlerStrategies.MSPID_SCOPE_ALLFORTX,
-    },
-    queryHandlerOptions: {
-      strategy: DefaultQueryHandlerStrategies.MSPID_SCOPE_ROUND_ROBIN,
-    },
+  const client = new grpc.Client(address, credentials, options);
+
+  // Extract from the stored identity object
+  const signer: Signer = signers.newPrivateKeySigner(crypto.createPrivateKey(identity.identity.credentials.privateKey));
+
+  const gwIdentity: Identity = {
+    mspId: identity.identity.mspId,
+    credentials: Buffer.from(identity.identity.credentials.certificate),
+  };
+
+  return connect({
+    client,
+    identity: gwIdentity,
+    signer,
+    evaluateOptions: () => ({ deadline: Date.now() + 5000 }),
+    endorseOptions: () => ({ deadline: Date.now() + 15000 }),
+    submitOptions: () => ({ deadline: Date.now() + 5000 }),
+    commitStatusOptions: () => ({ deadline: Date.now() + 60000 }),
   });
+};
 
-  const network = await gateway.getNetwork(channelName);
+const createGateway = (identity: CachedIdentity, channelName: string): Gateway => {
+  const configs = config.discovererConfigs;
+  if (configs.length === 0) throw new Error("No discovery endpoints configured");
+
+  let lastError: Error | undefined;
+
+  for (let i = 0; i < configs.length; i++) {
+    try {
+      const gateway = createGatewayWithEndpoint(identity, configs[i]);
+
+      // Test the connection by attempting to get the network
+      // This will fail if the peer doesn't have access to the channel
+      gateway.getNetwork(channelName);
+
+      logger.debug(`Connected to ${configs[i].url} for channel=${channelName}, user=${identity.user.getName()}`);
+      return gateway;
+    } catch (e: any) {
+      lastError = e;
+      logger.debug(`Failed to connect to ${configs[i].url} for channel=${channelName}: ${e.message}`);
+    }
+  }
+
+  throw new Error(`No available gateways for channel ${channelName}. Last error: ${lastError?.message}`);
+};
+
+const getNetwork = async (identity: CachedIdentity, channelName: string): Promise<CachedNetwork> => {
+  const key = `${identity.user.getName()}-${channelName}`;
+  const cached = networksCache.get<CachedNetwork>(key);
+
+  if (cached) {
+    logger.debug(`Got network from cache (user=${identity.user.getName()}, channel=${channelName})`);
+    return cached;
+  }
+
+  logger.debug(`Creating new network (user=${identity.user.getName()}, channel=${channelName})`);
+  const gateway = createGateway(identity, channelName);
+  const network = { gateway, channelName };
+  networksCache.set(key, network);
   return network;
 };
 
-const connect = async (identity: CachedIdentity, channelName: string): Promise<Network> => {
-  const loggerParams = `user=${identity.user.getName()}, channel=${channelName}`;
-  logger.debug(`Connecting to network (${loggerParams})`);
-
-  const key = `${identity.user.getName()}-${channelName}`;
-  const networkFromCache: Network | undefined = networksCache.get(key);
-
-  if (!networkFromCache) {
-    logger.debug(`Creating new network (${loggerParams})`);
-    const network = await connectToNetwork(identity, channelName);
-    networksCache.set(key, network);
-    return network;
-  } else {
-    logger.debug(`Got network from cache (${loggerParams})`);
-    return networkFromCache;
-  }
+const discover = async (user: User, channelName: string): Promise<Record<string, any>> => {
+  const userId = user.getName();
+  const client = Client.newClient(`client-${userId}`);
+  const discovery = await DiscoveryService.create(client, channelName, user);
+  return discovery.getDiscoveryResults(true);
 };
 
-export default { discover, connect };
+const invoke = async (
+  identity: CachedIdentity,
+  channelName: string,
+  chaincodeName: string,
+  method: string,
+  args: string[],
+  transient?: Record<string, Buffer>,
+): Promise<Buffer> => {
+  const { gateway } = await getNetwork(identity, channelName);
+  const network = gateway.getNetwork(channelName);
+  const contract = network.getContract(chaincodeName);
+
+  const proposal = contract.newProposal(method, {
+    arguments: args,
+    transientData: transient,
+  });
+
+  const transaction = await proposal.endorse();
+  const commit = await transaction.submit();
+  const status = await commit.getStatus();
+
+  if (status.code !== 0) {
+    const error = new Error(`Transaction failed with code ${status.code}`);
+    (error as any).transactionCode = status.code.toString();
+    throw error;
+  }
+
+  return Buffer.from(transaction.getResult());
+};
+
+const query = async (
+  identity: CachedIdentity,
+  channelName: string,
+  chaincodeName: string,
+  method: string,
+  args: string[],
+  transient?: Record<string, Buffer>,
+): Promise<Buffer> => {
+  const { gateway } = await getNetwork(identity, channelName);
+  const network = gateway.getNetwork(channelName);
+  const contract = network.getContract(chaincodeName);
+
+  const proposal = contract.newProposal(method, {
+    arguments: args,
+    transientData: transient,
+  });
+
+  const result = await proposal.evaluate();
+  return Buffer.from(result);
+};
+
+export default { discover, invoke, query };
