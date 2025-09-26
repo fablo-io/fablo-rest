@@ -54,7 +54,7 @@ const createConnectedDiscoveryService = async (
     logger.debug(`Default discovery endpoint set to ${discovererConfig.url} (${loggerParams})`);
     return discovery;
   } catch (e) {
-    logger.debug(`Discovery failed (${loggerParams}, error=${e.message})`);
+    logger.debug(`Discovery failed (${loggerParams}, error=${(e instanceof Error ? e.message : String(e))})`);
 
     if (attemptsLeft === 0) {
       logger.error(`Discovery failed and no more attempts left. Will return error response (channel=${channelName})`);

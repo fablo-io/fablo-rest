@@ -34,7 +34,7 @@ app.post("/user/enroll", async (req, res) => {
     const enrollResp = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
     const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, config.MSP_ID);
     res.status(200).send({ token });
-  } catch (e) {
+  } catch (e: any) {
     res.status(400).send({ message: e.message });
   }
 });
@@ -53,7 +53,7 @@ app.post("/user/reenroll", async (req, res) => {
     const token = await IdentityCache.put(id, enrollResp.key, enrollResp.certificate, config.MSP_ID);
     IdentityCache.del(caller.token);
     res.status(200).send({ token });
-  } catch (e) {
+  } catch (e: any) {
     res.status(400).send({ message: e.message });
   }
 });
@@ -78,7 +78,7 @@ app.post("/user/register", async (req, res) => {
   try {
     await ca.register(registerRequest, caller.user);
     return res.status(201).send({ message: "ok" });
-  } catch (e) {
+  } catch (e: any) {
     return res.status(400).send({ message: e.message });
   }
 });
@@ -98,7 +98,7 @@ app.get("/user/identities", async (req, res) => {
     } else {
       return res.status(400).send({ ...response, message: "Cannot get identities" });
     }
-  } catch (e) {
+  } catch (e: any) {
     return res.status(400).send({ message: e.message });
   }
 });
@@ -113,7 +113,7 @@ app.post("/discover/:channelName", async (req, res) => {
   try {
     const response = await NetworkPool.discover(identity.user, req.params.channelName);
     res.status(200).send({ response });
-  } catch (e) {
+  } catch (e: any) {
     res.status(500).send({ message: e.message });
   }
 });
@@ -126,19 +126,21 @@ app.post("/invoke/:channelName/:chaincodeName", async (req, res) => {
     return;
   }
 
-  const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
   logger.debug("Invoking chaincode %s by user %s", chaincodeReq.method, identity.user.getName());
 
   try {
-    const transactionResult = await network
-      .getContract(chaincodeReq.chaincodeName)
-      .createTransaction(chaincodeReq.method)
-      .setTransient(chaincodeReq.transient)
-      .submit(...chaincodeReq.args);
+    const transactionResult = await NetworkPool.invoke(
+      identity,
+      chaincodeReq.channelName,
+      chaincodeReq.chaincodeName,
+      chaincodeReq.method,
+      chaincodeReq.args,
+      chaincodeReq.transient
+    );
 
     const { status, response } = TransactionResult.parse(transactionResult);
     res.status(status).send({ response });
-  } catch (e) {
+  } catch (e: any) {
     res.status(400).send({ message: e.transactionCode ?? e.message });
   }
 });
@@ -151,19 +153,21 @@ app.post("/query/:channelName/:chaincodeName", async (req, res) => {
     return;
   }
 
-  const network = await NetworkPool.connect(identity, chaincodeReq.channelName);
   logger.debug("Querying chaincode %s by user %s", chaincodeReq.method, identity.user.getName());
 
   try {
-    const transactionResult = await network
-      .getContract(chaincodeReq.chaincodeName)
-      .createTransaction(chaincodeReq.method)
-      .setTransient(chaincodeReq.transient)
-      .evaluate(...chaincodeReq.args);
+    const transactionResult = await NetworkPool.query(
+      identity,
+      chaincodeReq.channelName,
+      chaincodeReq.chaincodeName,
+      chaincodeReq.method,
+      chaincodeReq.args,
+      chaincodeReq.transient
+    );
 
     const { status, response } = TransactionResult.parse(transactionResult);
     res.status(status).send({ response });
-  } catch (e) {
+  } catch (e: any) {
     res.status(400).send({ message: e.transactionCode ?? e.message });
   }
 });
